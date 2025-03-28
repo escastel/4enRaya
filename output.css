@@ -1794,7 +1794,8 @@ body, html {
 #board {
   display: grid;
   position: relative;
-  height: 80%;
+  height: fit-content;
+  padding-bottom: 5%;
   width: 80%;
   gap: 2%;
   background-color: rgb(24, 127, 245);
@@ -1806,34 +1807,54 @@ body, html {
   background-color: white;
   border-radius: 50%;
   margin: 10px;
+  position: relative;
+  opacity: 80%;
 }
-.cell:hover {
-  background-color: gray;
-  opacity: 90%;
-}
-.transition-red {
+.cellRed:hover {
   background-color: red;
-  border: 1px solid rgb(98, 0, 0);
-  transition-delay: 250ms;
-  transition-property: background-color;
+  opacity: 50%;
 }
-.transition-yellow {
+.cellYellow:hover {
   background-color: yellow;
-  border: 1px solid rgb(98, 98, 0);
-  transition-delay: 250ms;
-  transition-property: background-color, border;
+  opacity: 50%;
+}
+.ocupada {
+  width: 60%;
+  aspect-ratio: 1/1;
+  background-color: white;
+  border-radius: 50%;
+  margin: 10px;
+  position: relative;
+  opacity: 80%;
 }
 .ficha-roja {
-  width: fix-content;
+  width: 100%;
   aspect-ratio: 1/1;
   border-radius: 50%;
   background-color: red;
+  border: 1px solid rgb(98, 0, 0);
+  animation-duration: 3s;
+  animation-name: ficha;
+  position: relative;
+  opacity: 100%;
 }
 .ficha-amarilla {
-  width: fix-content;
+  width: 100%;
   aspect-ratio: 1/1;
   border-radius: 50%;
   background-color: yellow;
+  border: 1px solid rgb(98, 98, 0);
+  animation-duration: 3s;
+  animation-name: ficha;
+  position: relative;
+}
+@keyframes ficha {
+  from {
+    top: -2000%;
+  }
+  to {
+    top: 0%;
+  }
 }
 @property --tw-translate-x {
   syntax: "*";
