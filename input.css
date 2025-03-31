@@ -63,19 +63,19 @@ body, html {
     opacity: 80%;
 }
 
-.ficha-roja {
+.red {
     width: 100%;
     aspect-ratio: 1/1;
     border-radius: 50%;
     background-color: red;
-    border: 1px solid rgb(98, 0, 0);
+    border: 4px solid rgb(98, 0, 0);
     animation-duration: 3s;
     animation-name: ficha;
     position: relative;
     opacity: 100%;
 }
 
-.ficha-amarilla {
+.yellow {
     width: 100%;
     aspect-ratio: 1/1;
     border-radius: 50%;
