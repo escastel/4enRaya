@@ -37,18 +37,31 @@ function raya() {
 		player1.turn = true
 	}
 
-	function start(){
-		init()
-		while (!checkWin()){
-			clickEvent()
-			setTurn()
-			checkTurn()
+	async function start() {
+		init();
+	
+		for (let i = 0; i < columnList.length; i++) {
+			let column = columnList[i];
+			column.addEventListener("click", async () => {
+				if (!player1.winner && !player2.winner) {
+					console.log("Player1: ", player1.winner)
+					await readMap(column);
+					if (await checkWin().valueOf() === true) {
+						setTimeout(() => {
+							alert(`¡Jugador ${player1.turn ? player1.num : player2.num} ha ganado!`);
+						}, 3000);
+					}
+					else{
+						await setTurn()
+						await checkTurn()
+					}
+				}
+			});
 		}
-
 	}
 
 
-	function checkTurn(){
+	async function checkTurn(){
 		for (let i = 0; i < columnList.length; i++){
 			let cellsDiv = columnMap.get(columnList[i].id)
 			for (let j = 0; j < cellsDiv.length; j++){
@@ -64,14 +77,14 @@ function raya() {
 		}
 	}
 
-	function setClick(){
+	async function setClick(){
 		if (player1.turn)
 			player1.click = true
 		else
 			player2.click = true
 	}
 
-	function setTurn(){
+	async function setTurn(){
 		if (player1.click){
 			player1.click = false
 			player2.turn = true
@@ -84,7 +97,7 @@ function raya() {
 		}
 	}
 	
-	function placeToken(column, pos, player){
+	async function placeToken(cellsDiv, column, pos, player){
 		let ficha = document.createElement("div")
 		const newMap = boardMap.get(column.id);
 
@@ -92,35 +105,28 @@ function raya() {
 		boardMap.delete(column.id)
 		boardMap.set(column.id, newMap)
 		ficha.setAttribute("class", player.color)
-		cellsDiv[j].removeAttribute("class")
-		cellsDiv[j].setAttribute("class", "ocupada")
-		cellsDiv[j].appendChild(ficha);
+		cellsDiv[pos].removeAttribute("class")
+		cellsDiv[pos].setAttribute("class", "ocupada")
+		cellsDiv[pos].appendChild(ficha);
 		ficha.classList.toggle("ficha")
-		// checkWin()
 	}
 
-	function readMap(column){
+	async function readMap(column){
 		setClick()
 
 		let cellsDiv = columnMap.get(column.id)
 		for (let j = 0; j < cellsDiv.length ; j++){
 			if (boardMap.get(column.id)[j] == 0) {
 				if (player1.turn)
-					placeToken(column, j, player1)
+					placeToken(cellsDiv, column, j, player1)
 				else
-					placeToken(column, j, player2)
+					placeToken(cellsDiv, column, j, player2)
 				break ;
 			}
 		}
 	}
-	function clickEvent(){
-		for (let i = 0; i < columnList.length; i++){
-			let column = columnList[i];
-			column.addEventListener("click", () => readMap(column));
-		}
-	}
 
- function checkWin() {
+	async function checkWin() {
         const directions = [
             { x: 0, y: 1 }, 
 			{ x: 1, y: 0 }, 
@@ -142,21 +148,21 @@ function raya() {
                         for (let s = 1; s < 4; s++) {
                             let newCol = col + x * s * step;
                             let newRow = row + y * s * step;
-                            if (
-                                newCol >= 0 && newCol < columnList.length &&
+                            if (newCol >= 0 && newCol < columnList.length &&
                                 newRow >= 0 && newRow < 6 &&
-                                boardMap.get(columnList[newCol].id)[newRow] === currentPlayer
-                            ) {
+                                boardMap.get(columnList[newCol].id)[newRow] === currentPlayer)
                                 count++;
-                            } else {
+                            else
                                 break;
-                            }
                         }
                     }
-                    if (count >= 4) {
-                        alert(`¡Jugador ${currentPlayer} ha ganado!`);
-                        return true;
-                    }
+                    if (count >= 4){
+						if (player1.turn)
+							player1.winner = true
+						else
+							player2.winner = true
+						return true;
+					}
                 }
             }
         }
