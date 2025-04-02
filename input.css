@@ -1,24 +1,24 @@
 @import "tailwindcss";
 
-* {
+body, html {
     padding: 0%;
     margin: 0%;
-    box-sizing: border-box;
-}
-
-body, html {
 	height: 100%;
 	width: 100%;
     justify-content: center;
     align-items: center;
+    box-sizing: border-box;
+    overflow: hidden;
 }
 
 #game {
-    width: 90%;
-    height: 90%;
+    width: 100%;
+    height: auto;
+    margin-top: 2%;
+    margin-bottom: 2%;
     align-items: center;
 	justify-content: center;
-    position: relative;
+    align-self: center;
     display: flex;
 }
 
@@ -27,7 +27,7 @@ body, html {
     position: relative;
     height:fit-content;
     padding-bottom: 5%;
-    width: 80%;
+    width: 60%;
     gap: 2%;
 	background-color: rgb(24, 127, 245);
     border-radius: 1%;
