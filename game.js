@@ -206,7 +206,7 @@ function connectFour() {
     function aiToken() {
         console.log("Dentro de la funcion AI");
         let bestColumn;
-        let bestScore = -1;
+        let bestScore = 0;
     
         columnList.forEach((column) => {
             const columnData = boardMap.get(column.id);
@@ -216,7 +216,7 @@ function connectFour() {
                 return;
     
             columnData[row] = player2.num;
-            const score = Math.random();
+            const score = Math.random(); //minimax(player2.num);
             columnData[row] = 0;
     
             if (score > bestScore) {
@@ -228,6 +228,26 @@ function connectFour() {
         if (bestColumn)
             bestColumn.click();
     }
+
+/*     function minimax(num){
+        if (checkWin()) 
+            return num = 2 ? -1 : 1;
+        if (checkDraw())
+            return 0;
+
+        let score = 0;
+        columnList.forEach((column) => {
+            const columnData = boardMap.get(column.id);
+            const row = columnData.findIndex(cell => cell === 0);
+            if (row === -1) 
+                return 0;
+
+            columnData[row] = num;
+            score = minimax(num === 2 ? 1 : 2);
+            columnData[row] = 0;
+        });
+        return score;
+    } */
     start();
 }
 connectFour();
