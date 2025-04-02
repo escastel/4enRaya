@@ -7,6 +7,13 @@
     --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
       "Courier New", monospace;
     --color-red-500: oklch(0.637 0.237 25.331);
+    --color-yellow-500: oklch(0.795 0.184 86.047);
+    --color-green-400: oklch(0.792 0.209 151.711);
+    --color-teal-400: oklch(0.777 0.152 181.912);
+    --color-blue-500: oklch(0.623 0.214 259.815);
+    --color-purple-500: oklch(0.627 0.265 303.9);
+    --color-pink-400: oklch(0.718 0.202 349.761);
+    --color-pink-500: oklch(0.656 0.241 354.308);
     --spacing: 0.25rem;
     --ease-in: cubic-bezier(0.4, 0, 1, 1);
     --ease-out: cubic-bezier(0, 0, 0.2, 1);
@@ -426,6 +433,9 @@
   }
   .min-h-screen {
     min-height: 100vh;
+  }
+  .w-1 {
+    width: calc(var(--spacing) * 1);
   }
   .w-1\/2 {
     width: calc(1/2 * 100%);
@@ -1056,6 +1066,10 @@
     --tw-gradient-position: in oklab;
     background-image: conic-gradient(var(--tw-gradient-stops));
   }
+  .bg-gradient-to-r {
+    --tw-gradient-position: to right in oklab;
+    background-image: linear-gradient(var(--tw-gradient-stops));
+  }
   .bg-radial {
     --tw-gradient-position: in oklab;
     background-image: radial-gradient(var(--tw-gradient-stops));
@@ -1065,6 +1079,22 @@
   }
   .via-none {
     --tw-gradient-via-stops: initial;
+  }
+  .from-pink-500 {
+    --tw-gradient-from: var(--color-pink-500);
+    --tw-gradient-stops: var(--tw-gradient-via-stops, var(--tw-gradient-position), var(--tw-gradient-from) var(--tw-gradient-from-position), var(--tw-gradient-to) var(--tw-gradient-to-position));
+  }
+  .from-teal-400 {
+    --tw-gradient-from: var(--color-teal-400);
+    --tw-gradient-stops: var(--tw-gradient-via-stops, var(--tw-gradient-position), var(--tw-gradient-from) var(--tw-gradient-from-position), var(--tw-gradient-to) var(--tw-gradient-to-position));
+  }
+  .to-blue-500 {
+    --tw-gradient-to: var(--color-blue-500);
+    --tw-gradient-stops: var(--tw-gradient-via-stops, var(--tw-gradient-position), var(--tw-gradient-from) var(--tw-gradient-from-position), var(--tw-gradient-to) var(--tw-gradient-to-position));
+  }
+  .to-purple-500 {
+    --tw-gradient-to: var(--color-purple-500);
+    --tw-gradient-stops: var(--tw-gradient-via-stops, var(--tw-gradient-position), var(--tw-gradient-from) var(--tw-gradient-from-position), var(--tw-gradient-to) var(--tw-gradient-to-position));
   }
   .box-decoration-clone {
     -webkit-box-decoration-break: clone;
@@ -1771,6 +1801,54 @@
   .transform-view {
     transform-box: view-box;
   }
+  .hover\:from-green-400 {
+    &:hover {
+      @media (hover: hover) {
+        --tw-gradient-from: var(--color-green-400);
+        --tw-gradient-stops: var(--tw-gradient-via-stops, var(--tw-gradient-position), var(--tw-gradient-from) var(--tw-gradient-from-position), var(--tw-gradient-to) var(--tw-gradient-to-position));
+      }
+    }
+  }
+  .hover\:from-pink-400 {
+    &:hover {
+      @media (hover: hover) {
+        --tw-gradient-from: var(--color-pink-400);
+        --tw-gradient-stops: var(--tw-gradient-via-stops, var(--tw-gradient-position), var(--tw-gradient-from) var(--tw-gradient-from-position), var(--tw-gradient-to) var(--tw-gradient-to-position));
+      }
+    }
+  }
+  .hover\:from-teal-400 {
+    &:hover {
+      @media (hover: hover) {
+        --tw-gradient-from: var(--color-teal-400);
+        --tw-gradient-stops: var(--tw-gradient-via-stops, var(--tw-gradient-position), var(--tw-gradient-from) var(--tw-gradient-from-position), var(--tw-gradient-to) var(--tw-gradient-to-position));
+      }
+    }
+  }
+  .hover\:to-blue-500 {
+    &:hover {
+      @media (hover: hover) {
+        --tw-gradient-to: var(--color-blue-500);
+        --tw-gradient-stops: var(--tw-gradient-via-stops, var(--tw-gradient-position), var(--tw-gradient-from) var(--tw-gradient-from-position), var(--tw-gradient-to) var(--tw-gradient-to-position));
+      }
+    }
+  }
+  .hover\:to-red-500 {
+    &:hover {
+      @media (hover: hover) {
+        --tw-gradient-to: var(--color-red-500);
+        --tw-gradient-stops: var(--tw-gradient-via-stops, var(--tw-gradient-position), var(--tw-gradient-from) var(--tw-gradient-from-position), var(--tw-gradient-to) var(--tw-gradient-to-position));
+      }
+    }
+  }
+  .hover\:to-yellow-500 {
+    &:hover {
+      @media (hover: hover) {
+        --tw-gradient-to: var(--color-yellow-500);
+        --tw-gradient-stops: var(--tw-gradient-via-stops, var(--tw-gradient-position), var(--tw-gradient-from) var(--tw-gradient-from-position), var(--tw-gradient-to) var(--tw-gradient-to-position));
+      }
+    }
+  }
 }
 body, html {
   padding: 0%;
@@ -1784,13 +1862,14 @@ body, html {
 }
 #game {
   width: 100%;
-  height: auto;
-  margin-top: 2%;
-  margin-bottom: 2%;
+  height: 100%;
+  min-width: 336px;
+  min-height: 155px;
   align-items: center;
   justify-content: center;
   align-self: center;
   display: flex;
+  position: relative;
 }
 #board {
   display: grid;
@@ -1801,6 +1880,7 @@ body, html {
   gap: 2%;
   background-color: rgb(24, 127, 245);
   border-radius: 1%;
+  border: 2px solid rgb(0, 77, 112);
 }
 .cell {
   width: 60%;
@@ -1811,18 +1891,14 @@ body, html {
   position: relative;
   opacity: 80%;
 }
-.cellRed:hover {
-  background-color: red;
-  opacity: 50%;
-}
-.cellYellow:hover {
-  background-color: yellow;
-  opacity: 50%;
+.cell:hover {
+  opacity: 80%;
 }
 .winner-red {
   position: absolute;
   border: 2px solid rgb(7, 39, 76);
   background-color: rgb(24, 127, 245);
+  opacity: 80%;
   border-radius: 1%;
   width: 80%;
   height: 20%;
@@ -1843,6 +1919,7 @@ body, html {
   position: absolute;
   border: 2px solid rgb(7, 39, 76);
   background-color: rgb(24, 127, 245);
+  opacity: 80%;
   border-radius: 1%;
   width: 80%;
   height: 20%;
@@ -1859,6 +1936,22 @@ body, html {
   font-size: 100%;
   font-weight: bolder;
 }
+.draw {
+  position: absolute;
+  border: 2px solid rgb(7, 39, 76);
+  background-color: rgb(24, 127, 245);
+  opacity: 80%;
+  border-radius: 1%;
+  width: 80%;
+  height: 20%;
+  z-index: 1;
+  place-self: center;
+  text-align: center;
+  align-content: center;
+  color: white;
+  font-weight: bolder;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+}
 .filled {
   width: 60%;
   aspect-ratio: 1/1;
@@ -1874,7 +1967,7 @@ body, html {
   border-radius: 50%;
   background-color: red;
   border: 2px solid rgb(98, 0, 0);
-  animation-duration: 3s;
+  animation-duration: 2s;
   animation-name: token;
   position: relative;
   opacity: 100%;
@@ -1885,13 +1978,13 @@ body, html {
   border-radius: 50%;
   background-color: yellow;
   border: 2px solid rgb(98, 98, 0);
-  animation-duration: 3s;
+  animation-duration: 2s;
   animation-name: token;
   position: relative;
 }
 @keyframes token {
   from {
-    top: -2000%;
+    top: -100vh;
   }
   to {
     top: 0%;
@@ -1993,6 +2086,48 @@ body, html {
   syntax: "*";
   inherits: false;
   initial-value: 0;
+}
+@property --tw-gradient-position {
+  syntax: "*";
+  inherits: false;
+}
+@property --tw-gradient-from {
+  syntax: "<color>";
+  inherits: false;
+  initial-value: #0000;
+}
+@property --tw-gradient-via {
+  syntax: "<color>";
+  inherits: false;
+  initial-value: #0000;
+}
+@property --tw-gradient-to {
+  syntax: "<color>";
+  inherits: false;
+  initial-value: #0000;
+}
+@property --tw-gradient-stops {
+  syntax: "*";
+  inherits: false;
+}
+@property --tw-gradient-via-stops {
+  syntax: "*";
+  inherits: false;
+}
+@property --tw-gradient-from-position {
+  syntax: "<length-percentage>";
+  inherits: false;
+  initial-value: 0%;
+}
+@property --tw-gradient-via-position {
+  syntax: "<length-percentage>";
+  inherits: false;
+  initial-value: 50%;
+}
+@property --tw-gradient-to-position {
+  syntax: "<length-percentage>";
+  inherits: false;
+  initial-value: 100%;
 }
 @property --tw-leading {
   syntax: "*";

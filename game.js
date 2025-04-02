@@ -48,9 +48,11 @@ function  connectFour() {
         if (player1.winner || player2.winner) return;
 
         placeToken(column);
-        if (checkWin()) {
+        if (checkWin())
             insertDivWinner()
-        } else {
+        else if (checkDraw())
+            insertDivDraw()
+        else {
             toggleTurn();
             updateTurnIndicator();
         }
@@ -61,11 +63,20 @@ function  connectFour() {
         const playerWinner = player1.winner ? `winner-${player1.color}` : `winner-${player2.color}`;
         const player = player1.winner ? "Player 1" : "Player 2";
         
-        winner.className = `${playerWinner}`;
+        winner.className = `${playerWinner} bg-gradient-to-r from-teal-400 to-blue-500`;
         winner.innerHTML = `¡El <span>${player}</span> ha ganado!`
         document.getElementById("board").appendChild(winner);
             
     }
+
+    function insertDivDraw(){
+        const draw = document.createElement("div")
+
+        draw.className = `draw`
+        draw.innerText = `¡Empate!`
+        document.getElementById("board").appendChild(draw);
+    }
+
 	function toggleTurn() {
         player1.turn = !player1.turn;
         player2.turn = !player2.turn;
@@ -76,7 +87,7 @@ function  connectFour() {
             const cells = columnMap.get(column.id);
             cells.forEach((cell) => {
                 if (cell.classList.contains("cell")) {
-                    cell.className = `cell ${player1.turn ? "cellRed" : "cellYellow"}`;
+                    cell.className = `cell ${player1.turn ? `bg-gradient-to-r hover:from-pink-400 hover:to-red-500` : "bg-gradient-to-r hover:from-green-400 hover:to-yellow-500"}`;
                 }
             });
         });
@@ -101,6 +112,20 @@ function  connectFour() {
                 break;
             }
         }
+    }
+
+    function checkDraw(){
+        let draw = true;
+
+        columnList.forEach((column) => {
+            const cells = columnMap.get(column.id);
+            cells.forEach((cell) => {
+                if (cell.classList.contains("cell")) {
+                    draw = false;
+                }
+            });
+        });
+        return draw;
     }
 
 	function checkWin() {
