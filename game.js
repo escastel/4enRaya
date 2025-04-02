@@ -49,13 +49,23 @@ function  connectFour() {
 
         placeToken(column);
         if (checkWin()) {
-            alert(`¡Jugador ${player1.turn ? player1.num : player2.num} ha ganado!`);
+            insertDivWinner()
         } else {
             toggleTurn();
             updateTurnIndicator();
         }
     }
 
+    function insertDivWinner(){
+        const winner = document.createElement("div")
+        const playerWinner = player1.winner ? `winner-${player1.color}` : `winner-${player2.color}`;
+        const player = player1.winner ? "Player 1" : "Player 2";
+        
+        winner.className = `${playerWinner}`;
+        winner.innerHTML = `¡El <span>${player}</span> ha ganado!`
+        document.getElementById("board").appendChild(winner);
+            
+    }
 	function toggleTurn() {
         player1.turn = !player1.turn;
         player2.turn = !player2.turn;
@@ -74,8 +84,8 @@ function  connectFour() {
 	
 	function updateCell(cell, player) {
         const token = document.createElement("div");
-        token.className = `token ${player.color}`;
-        cell.className = "ocupada";
+        token.className = `token-${player.color}`;
+        cell.className = "filled";
         cell.appendChild(token);
     }
 
