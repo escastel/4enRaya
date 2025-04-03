@@ -1,16 +1,17 @@
-function game() {
+function connectFour(): void {
     let timeAI;
     let columnMap = new Map();
     let columnList = new Array();
     const boardMap = new Map();
 
     class Player {
-        color;
-        turn;
-        winner;
-        num;
-        AI;
-        constructor(AI, num, color) {
+        color: string;
+        turn: boolean;
+        winner: boolean;
+        num: number;
+        AI : boolean;
+
+        constructor(AI: boolean, num: number, color: string) {
             this.AI = AI;
             this.num = num;
             this.color = color;
@@ -21,25 +22,25 @@ function game() {
     const player1 = new Player(false, 1, "red");
     const player2 = new Player(false, 2, "yellow");
 
-    function setArray(num) {
+    function setArray(num: string) {
         let array = new Array();
 
         for (let i = 1; i <= 6; i++)
-            array.push(document.getElementById("c" + num + i.toString()));
+            array.push(document.getElementById("c" + num + i.toString()) as HTMLElement);
         return array;
     }
 
-    function init() {
+    function init(): void {
         player1.turn = true;
 
         for (let i = 1; i <= 7; i++) {
             boardMap.set(("c" + i.toString()), Array(6).fill(0));
             columnMap.set("c" + i.toString(), setArray(i.toString()));
-            columnList.push(document.getElementById("c" + i.toString()));
+            columnList.push(document.getElementById("c" + i.toString()) as HTMLElement);
         }
     }
 
-    function start() {
+    function start(): void {
         init();
 
         columnList.forEach((column) => {
@@ -47,23 +48,23 @@ function game() {
         });
     }
 
-    function stop(){
+    function stop(): void {
         clearTimeout(timeAI);
     }
     
-    function enableClicks() {
+    function enableClicks(): void {
         columnList.forEach((column) => {
             column.style.pointerEvents = "auto";
         });
     }
 
-    function disableClicks() {
+    function disableClicks(): void {
         columnList.forEach((column) => {
             column.style.pointerEvents = "none";
         });
     }
     
-    function handleColumnClick(column) {
+    function handleColumnClick(column: HTMLElement): void {
         if (player1.winner || player2.winner) { stop(); return ;}
 
         placeToken(column);
@@ -81,25 +82,31 @@ function game() {
         }
     }
 
-    function insertDivWinner() {
+    function insertDivWinner(): void {
         const winner = document.createElement("div");
         const playerWinner = player1.winner ? `winner-${player1.color}` : `winner-${player2.color}`;
         const player = player1.winner ? "Player 1" : "Player 2";
+		const boardElement = document.getElementById("board")
+		if (!boardElement)
+			return ;
 
         winner.className = `${playerWinner} bg-gradient-to-r from-teal-400 to-blue-500`;
         winner.innerHTML = `¡El <span>${player}</span> ha ganado!`;
-        document.getElementById("board").appendChild(winner);
+		boardElement.appendChild(winner);
     }
 
-    function insertDivDraw() {
+    function insertDivDraw(): void {
         const draw = document.createElement("div");
+		const boardElement = document.getElementById("board");
+		if (!boardElement)
+			return ;
 
         draw.className = `draw bg-gradient-to-r from-red-400 to-yellow-500`;
         draw.innerText = `¡Empate!`;
-        document.getElementById("board").appendChild(draw);
+        boardElement.appendChild(draw);
     }
 
-    function updateTurnIndicator() {
+    function updateTurnIndicator(): void {
         player1.turn = !player1.turn;
         player2.turn = !player2.turn;
         
@@ -116,7 +123,7 @@ function game() {
         });
     }
 
-    function updateCell(cell, player) {
+    function updateCell(cell: HTMLElement, player: Player): void {
         const token = document.createElement("div");
 
         token.className = `token-${player.color}`;
@@ -124,7 +131,7 @@ function game() {
         cell.appendChild(token);
     }
 
-    function placeToken(column) {
+    function placeToken(column: HTMLElement): void {
         const cells = columnMap.get(column.id);
         const columnData = boardMap.get(column.id);
         const row = columnData.findIndex(cell => cell === 0);
@@ -136,7 +143,7 @@ function game() {
         updateCell(cells[row], currentPlayer);
     }
 
-    function checkDraw() {
+    function checkDraw(): boolean {
         let draw = true;
 
         columnList.forEach((column) => {
@@ -147,7 +154,7 @@ function game() {
         return draw;
     }
 
-    function checkWin(checking) {
+    function checkWin(checking: boolean): boolean {
         const directions = [
             { x: 0, y: 1 },
             { x: 1, y: 0 },
@@ -172,7 +179,7 @@ function game() {
         return false;
     }
 
-    function checkDirection(col, row, player, directions) {
+    function checkDirection(col: number, row: number, player: string, directions): boolean {
         for (const { x, y } of directions) {
             let count = 1;
 
@@ -195,7 +202,7 @@ function game() {
         return false;
     }
 
-    function aiToken() {
+    function aiToken(): void {
         let bestScore = -Infinity;
         let bestColumn = null;
     
@@ -216,7 +223,7 @@ function game() {
         if (bestColumn) handleColumnClick(bestColumn)
     }
 
-    function minmax(depth, isMax, alpha, beta) {
+    function minmax(depth, isMax, alpha, beta): number {
         if (checkWin(true)) return isMax ? -1 : 1;
         if (checkDraw()) return 0;
         if (depth === 0) return evaluateBoard();
@@ -253,7 +260,7 @@ function game() {
         }
     }
 
-    function evaluateBoard() {
+    function evaluateBoard(): number {
         let score = 0;
     
         columnList.forEach((column) => {
@@ -269,4 +276,4 @@ function game() {
 
     start();
 }
-game();
+connectFour();
