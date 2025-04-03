@@ -1,7 +1,8 @@
 function connectFour() {
-    const boardMap = new Map();
+    let timeAI;
     let columnMap = new Map();
     let columnList = new Array();
+    const boardMap = new Map();
 
     class Player {
         color;
@@ -18,7 +19,7 @@ function connectFour() {
         }
     }
     const player1 = new Player(false, 1, "red");
-    const player2 = new Player(true, 2, "yellow");
+    const player2 = new Player(false, 2, "yellow");
 
     function setArray(num) {
         let array = new Array();
@@ -46,10 +47,8 @@ function connectFour() {
         });
     }
 
-    function disableClicks() {
-        columnList.forEach((column) => {
-            column.style.pointerEvents = "none";
-        });
+    function stop(){
+        clearTimeout(timeAI);
     }
     
     function enableClicks() {
@@ -58,21 +57,23 @@ function connectFour() {
         });
     }
 
+    function disableClicks() {
+        columnList.forEach((column) => {
+            column.style.pointerEvents = "none";
+        });
+    }
+    
     function handleColumnClick(column) {
-        if (player1.winner || player2.winner) 
-            return;
+        if (player1.winner || player2.winner) { stop(); return ;}
 
         placeToken(column);
-        if (checkWin()) 
-            insertDivWinner();
-        else if (checkDraw()) 
-            insertDivDraw();
+        if (checkWin(false)) insertDivWinner();
+        else if (checkDraw()) insertDivDraw();
         else {
             updateTurnIndicator();
-
             if (player2.turn && player2.AI){
                 disableClicks();
-                setTimeout(() => {
+                timeAI = setTimeout(() => {
                     aiToken();
                     enableClicks();
                 }, 1000);
@@ -93,7 +94,7 @@ function connectFour() {
     function insertDivDraw() {
         const draw = document.createElement("div");
 
-        draw.className = `draw`;
+        draw.className = `draw bg-gradient-to-r from-red-400 to-yellow-500`;
         draw.innerText = `¡Empate!`;
         document.getElementById("board").appendChild(draw);
     }
@@ -109,7 +110,7 @@ function connectFour() {
                 if (cell.classList.contains("cell") && !player2.AI) {
                     cell.className = `cell ${player1.turn ? 
                         `bg-gradient-to-r hover:from-pink-400 hover:to-red-500` : 
-                        "bg-gradient-to-r hover:from-green-400 hover:to-yellow-500"}`;
+                        "bg-gradient-to-r hover:from-orange-400 hover:to-yellow-500"}`;
                 }
             });
         });
@@ -126,10 +127,8 @@ function connectFour() {
     function placeToken(column) {
         const cells = columnMap.get(column.id);
         const columnData = boardMap.get(column.id);
-
         const row = columnData.findIndex(cell => cell === 0);
-        if (row === -1)
-            return;
+        if (row === -1) return;
 
         const currentPlayer = player1.turn ? player1 : player2;
         columnData[row] = currentPlayer.num;
@@ -141,18 +140,14 @@ function connectFour() {
         let draw = true;
 
         columnList.forEach((column) => {
-            const cells = columnMap.get(column.id);
-
-            cells.forEach((cell) => {
-                if (cell.classList.contains("cell")) {
-                    draw = false;
-                }
-            });
+            const columnData = boardMap.get(column.id);
+            const row = columnData.findIndex(cell => cell === 0);
+            if (row != -1) draw = false;
         });
         return draw;
     }
 
-    function checkWin() {
+    function checkWin(checking) {
         const directions = [
             { x: 0, y: 1 },
             { x: 1, y: 0 },
@@ -166,11 +161,10 @@ function connectFour() {
 
             for (let row = 0; row < columnData.length; row++) {
                 const currentPlayer = columnData[row];
-                if (currentPlayer === 0) 
-                    continue;
+                if (currentPlayer === 0) continue;
 
                 if (checkDirection(col, row, currentPlayer, directions)) {
-                    player1.turn ? player1.winner = true : player2.winner = true;
+                    if (!checking) player1.turn? player1.winner = true : player2.winner = true;
                     return true;
                 }
             }
@@ -193,30 +187,25 @@ function connectFour() {
                         newRow < 6 &&
                         boardMap.get(columnList[newCol].id)[newRow] === player) {
                         count++;
-                    } else
-                        break;
+                    } else break;
                 }
             }
-            if (count >= 4) 
-                return true;
+            if (count >= 4) return true;
         }
         return false;
     }
 
     function aiToken() {
-        console.log("Dentro de la funcion AI");
-        let bestColumn;
-        let bestScore = 0;
+        let bestScore = -Infinity;
+        let bestColumn = null;
     
         columnList.forEach((column) => {
             const columnData = boardMap.get(column.id);
-    
             const row = columnData.findIndex(cell => cell === 0);
-            if (row === -1) 
-                return;
+            if (row === -1) return;
     
             columnData[row] = player2.num;
-            const score = Math.random(); //minimax(player2.num);
+            const score = minmax(6, false, -Infinity, Infinity);
             columnData[row] = 0;
     
             if (score > bestScore) {
@@ -224,30 +213,60 @@ function connectFour() {
                 bestColumn = column;
             }
         });
-    
-        if (bestColumn)
-            bestColumn.click();
+        if (bestColumn) handleColumnClick(bestColumn)
     }
 
-/*     function minimax(num){
-        if (checkWin()) 
-            return num = 2 ? -1 : 1;
-        if (checkDraw())
-            return 0;
+    function minmax(depth, isMax, alpha, beta) {
+        if (checkWin(true)) return isMax ? -1 : 1;
+        if (checkDraw()) return 0;
+        if (depth === 0) return evaluateBoard();
 
+        if (isMax) {
+            columnList.forEach((column) => {
+                const columnData = boardMap.get(column.id);
+                const row = columnData.findIndex(cell => cell === 0);
+                if (row === -1) return;
+
+                columnData[row] = player2.num;
+                const eval = minmax(depth - 1, false, alpha, beta);
+                columnData[row] = 0;
+
+                alpha = Math.max(alpha, eval);
+                if (beta <= alpha) return ;
+            });
+            return alpha;
+        }
+        else {
+            columnList.forEach((column) => {
+                const columnData = boardMap.get(column.id);
+                const row = columnData.findIndex(cell => cell === 0);
+                if (row === -1) return;
+
+                columnData[row] = player1.num;
+                const eval = minmax(depth - 1, true, alpha, beta);
+                columnData[row] = 0;
+
+                beta = Math.min(beta, eval);
+                if (beta <= alpha) return ;
+            });
+            return beta;
+        }
+    }
+
+    function evaluateBoard() {
         let score = 0;
+    
         columnList.forEach((column) => {
             const columnData = boardMap.get(column.id);
-            const row = columnData.findIndex(cell => cell === 0);
-            if (row === -1) 
-                return 0;
-
-            columnData[row] = num;
-            score = minimax(num === 2 ? 1 : 2);
-            columnData[row] = 0;
+    
+            columnData.forEach((cell) => {
+                if (cell === player2.num) score += 1;
+                else if (cell === player1.num) score -= 1;
+            });
         });
         return score;
-    } */
+    }
+
     start();
 }
 connectFour();

@@ -39,6 +39,7 @@ body, html {
     width: 60%;
     aspect-ratio: 1/1;
     background-color: white;
+    border: 2px solid  rgb(0, 77, 112);
     border-radius: 50%;
 	margin: 10%;
     position: relative;
@@ -54,7 +55,7 @@ body, html {
     opacity: 80%;
     border-radius: 1%;
     width: 80%;
-    height: 20%;
+    height: fit-content;
     z-index: 1;
     place-self: center;
     text-align: center;
@@ -75,7 +76,7 @@ body, html {
     opacity: 80%;
     border-radius: 1%;
     width: 80%;
-    height: 20%;
+    height: fit-content;
     z-index: 1;
     place-self: center;
     text-align: center;
@@ -94,17 +95,17 @@ body, html {
 .draw {
     position: absolute;
     border:2px solid rgb(7, 39, 76);
-    background-color: rgb(24, 127, 245);
     opacity: 80%;
     border-radius: 1%;
     width: 80%;
-    height: 20%;
+    height: fit-content;
     z-index: 1;
     place-self: center;
     text-align: center;
     align-content: center;
     color:white;
     font-weight: bolder;
+    font-size: 120%;
     font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
 
 }
@@ -117,15 +118,17 @@ body, html {
 	margin: 10%;
     position: relative;
     opacity: 80%;
+    border: 2px solid  rgb(0, 77, 112);
 }
 
 .token-red {
     width: 100%;
+    height: max-content;
     aspect-ratio: 1/1;
     border-radius: 50%;
-    background-color: red;
-    border: 2px solid rgb(98, 0, 0);
-    animation-duration: 2s;
+    background-color: rgb(255, 2, 2);
+    /* border: 2px solid rgb(98, 0, 0); */
+    animation-duration:1s;
     animation-name: token;
     position: relative;
     opacity: 100%;
@@ -136,17 +139,16 @@ body, html {
     aspect-ratio: 1/1;
     border-radius: 50%;
     background-color: yellow;
-    border: 2px solid rgb(98, 98, 0);
-    animation-duration: 2s;
+    /* border: 2px solid rgb(98, 98, 0); */
+    animation-duration: 1s;
     animation-name: token;
     position: relative;
 }
 
 @keyframes token {
     from {
-        top: -100vh;
+        top: -1000;
     }
-    
     to {
         top: 0%;
     }
