@@ -19,7 +19,7 @@ function game() {
         }
     }
     const player1 = new Player(false, 1, "red");
-    const player2 = new Player(false, 2, "yellow");
+    const player2 = new Player(true, 2, "yellow");
 
     function setArray(num) {
         let array = new Array();
@@ -83,7 +83,7 @@ function game() {
 
     function insertDivWinner() {
         const winner = document.createElement("div");
-        const playerWinner = player1.winner ? `winner-${player1.color}` : `winner-${player2.color}`;
+        const playerWinner = player1.winner ? `winner ${player1.color}` : `winner ${player2.color}`;
         const player = player1.winner ? "Player 1" : "Player 2";
 
         winner.className = `${playerWinner} bg-gradient-to-r from-teal-400 to-blue-500`;
@@ -110,7 +110,7 @@ function game() {
                 if (cell.classList.contains("cell") && !player2.AI) {
                     cell.className = `cell ${player1.turn ? 
                         `bg-gradient-to-r hover:from-pink-400 hover:to-red-500` : 
-                        "bg-gradient-to-r hover:from-orange-400 hover:to-yellow-500"}`;
+                        `bg-gradient-to-r hover:from-orange-400 hover:to-yellow-500`}`;
                 }
             });
         });
@@ -119,7 +119,7 @@ function game() {
     function updateCell(cell, player) {
         const token = document.createElement("div");
 
-        token.className = `token-${player.color}`;
+        token.className = `token ${player.color}`;
         cell.className = "filled";
         cell.appendChild(token);
     }
