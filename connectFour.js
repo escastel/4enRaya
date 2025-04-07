@@ -1,8 +1,8 @@
-function game() {
+function game(AI) {
     let timeAI;
     let columnMap = new Map();
     let columnList = new Array();
-    const boardMap = new Map();
+    let boardMap = new Map();
 
     class Player {
         color;
@@ -19,7 +19,7 @@ function game() {
         }
     }
     const player1 = new Player(false, 1, "red");
-    const player2 = new Player(true, 2, "yellow");
+    const player2 = new Player(AI, 2, "yellow");
 
     function setArray(num) {
         let array = new Array();
@@ -30,6 +30,7 @@ function game() {
     }
 
     function init() {
+        console.log("toy inicializando")
         player1.turn = true;
 
         for (let i = 1; i <= 7; i++) {
@@ -43,14 +44,21 @@ function game() {
         init();
 
         columnList.forEach((column) => {
-                column.addEventListener("click", () => handleColumnClick(column));
+            column.addEventListener("click", () => handleColumnClick(column));
         });
     }
 
-    function stop(){
+    function cleanBoard() {
+        boardMap.clear()
+        columnMap.clear()
+        columnList = []
+    }
+
+    function stop() {
+        cleanBoard()
         clearTimeout(timeAI);
     }
-    
+
     function enableClicks() {
         columnList.forEach((column) => {
             column.style.pointerEvents = "auto";
@@ -62,16 +70,16 @@ function game() {
             column.style.pointerEvents = "none";
         });
     }
-    
+
     function handleColumnClick(column) {
-        if (player1.winner || player2.winner) { stop(); return ;}
+        if (player1.winner || player2.winner) { stop(); return; }
 
         placeToken(column);
-        if (checkWin(false)) insertDivWinner();
-        else if (checkDraw()) insertDivDraw();
+        if (checkWin(false)) insertDivWinner(), stop();
+        else if (checkDraw()) insertDivDraw(), stop();
         else {
             updateTurnIndicator();
-            if (player2.turn && player2.AI){
+            if (player2.turn && player2.AI) {
                 disableClicks();
                 timeAI = setTimeout(() => {
                     aiToken();
@@ -83,10 +91,11 @@ function game() {
 
     function insertDivWinner() {
         const winner = document.createElement("div");
-        const playerWinner = player1.winner ? `winner ${player1.color}` : `winner ${player2.color}`;
+        const playerWinner = player1.winner ? `${player1.color}` : `${player2.color}`;
         const player = player1.winner ? "Player 1" : "Player 2";
 
         winner.className = `${playerWinner} bg-gradient-to-r from-teal-400 to-blue-500`;
+        winner.id = `winner`
         winner.innerHTML = `¡El <span>${player}</span> ha ganado!`;
         document.getElementById("board").appendChild(winner);
     }
@@ -94,7 +103,8 @@ function game() {
     function insertDivDraw() {
         const draw = document.createElement("div");
 
-        draw.className = `draw bg-gradient-to-r from-red-400 to-yellow-500`;
+        draw.className = `bg-gradient-to-r from-red-400 to-yellow-500`;
+        draw.id = `draw`
         draw.innerText = `¡Empate!`;
         document.getElementById("board").appendChild(draw);
     }
@@ -102,14 +112,14 @@ function game() {
     function updateTurnIndicator() {
         player1.turn = !player1.turn;
         player2.turn = !player2.turn;
-        
+
         columnList.forEach((column) => {
             const cells = columnMap.get(column.id);
 
             cells.forEach((cell) => {
                 if (cell.classList.contains("cell") && !player2.AI) {
-                    cell.className = `cell ${player1.turn ? 
-                        `bg-gradient-to-r hover:from-pink-400 hover:to-red-500` : 
+                    cell.className = `cell ${player1.turn ?
+                        `bg-gradient-to-r hover:from-pink-400 hover:to-red-500` :
                         `bg-gradient-to-r hover:from-orange-400 hover:to-yellow-500`}`;
                 }
             });
@@ -164,7 +174,7 @@ function game() {
                 if (currentPlayer === 0) continue;
 
                 if (checkDirection(col, row, currentPlayer, directions)) {
-                    if (!checking) player1.turn? player1.winner = true : player2.winner = true;
+                    if (!checking) player1.turn ? player1.winner = true : player2.winner = true;
                     return true;
                 }
             }
@@ -198,16 +208,16 @@ function game() {
     function aiToken() {
         let bestScore = -Infinity;
         let bestColumn = null;
-    
+
         columnList.forEach((column) => {
             const columnData = boardMap.get(column.id);
             const row = columnData.findIndex(cell => cell === 0);
             if (row === -1) return;
-    
+
             columnData[row] = player2.num;
             const score = minmax(6, false, -Infinity, Infinity);
             columnData[row] = 0;
-    
+
             if (score > bestScore) {
                 bestScore = score;
                 bestColumn = column;
@@ -232,7 +242,7 @@ function game() {
                 columnData[row] = 0;
 
                 alpha = Math.max(alpha, eval);
-                if (beta <= alpha) return ;
+                if (beta <= alpha) return;
             });
             return alpha;
         }
@@ -247,7 +257,7 @@ function game() {
                 columnData[row] = 0;
 
                 beta = Math.min(beta, eval);
-                if (beta <= alpha) return ;
+                if (beta <= alpha) return;
             });
             return beta;
         }
@@ -255,10 +265,10 @@ function game() {
 
     function evaluateBoard() {
         let score = 0;
-    
+
         columnList.forEach((column) => {
             const columnData = boardMap.get(column.id);
-    
+
             columnData.forEach((cell) => {
                 if (cell === player2.num) score += 1;
                 else if (cell === player1.num) score -= 1;
@@ -267,6 +277,10 @@ function game() {
         return score;
     }
 
+    document.getElementById("btnMn").addEventListener("click", () => {
+        stop();
+        volverMenu();
+    });
+
     start();
 }
-game();
