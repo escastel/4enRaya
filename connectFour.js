@@ -48,14 +48,14 @@ function game(AI) {
         });
     }
 
-    function cleanBoard() {
+    function clearGame() {
         boardMap.clear()
         columnMap.clear()
         columnList = []
     }
 
     function stop() {
-        cleanBoard()
+        clearGame()
         clearTimeout(timeAI);
     }
 
