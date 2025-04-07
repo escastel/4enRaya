@@ -30,7 +30,6 @@ function game(AI) {
     }
 
     function init() {
-        console.log("toy inicializando")
         player1.turn = true;
 
         for (let i = 1; i <= 7; i++) {
@@ -279,8 +278,6 @@ function game(AI) {
 
     document.getElementById("btnMn").addEventListener("click", () => {
         stop();
-        volverMenu();
+        returnToMenu();
     });
-
-    start();
 }

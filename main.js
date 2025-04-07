@@ -1,27 +1,4 @@
-function resetDivs(){
-	let cells = Array.from(document.getElementsByClassName("cell"))
-	cells.forEach(cell => {
-		cell.className = "cell bg-gradient-to-r hover:from-pink-400 hover:to-red-500"
-	})
-
-	let filleds = Array.from(document.getElementsByClassName("filled"))
-	filleds = Array.from(document.getElementsByClassName("filled"))
-	filleds.forEach(filled => {
-		filled.className = "cell bg-gradient-to-r hover:from-pink-400 hover:to-red-500"
-	})
-
-	let tokens = Array.from(document.getElementsByClassName("token"))
-	tokens = Array.from(document.getElementsByClassName("token"))
-	tokens.forEach(token => {
-		token.remove()
-	})
-	if (document.getElementById("winner"))
-		document.getElementById("winner").remove()
-	if (document.getElementById("draw"))
-		document.getElementById("draw").remove()
-}
-
-function volverMenu(){
+function returnToMenu(){
 	function resetDivs(){
 		let cells = Array.from(document.getElementsByClassName("cell"))
 		cells.forEach(cell => {
@@ -58,7 +35,7 @@ function volverMenu(){
 	resetDisplay()
 }
 
-function handle(){
+function enterTheGame(){
 	function ocultarMenu() {
 		document.getElementById("menu").style.display = 'none';
 		document.getElementById("board").style.float = 'none';
@@ -67,25 +44,25 @@ function handle(){
 		const buttom = document.createElement("button")
 		buttom.className = "bg-gradient-to-r from-teal-400 to-blue-500"
 		buttom.id = "btnMn"
-		buttom.innerText = "Volver al menú"
+		buttom.innerText = "Return to menu"
 		document.getElementById("board").appendChild(buttom);
 	}
 	
-	document.getElementById("btnClasico").addEventListener("click", () => {
+	document.getElementById("btnClassic").addEventListener("click", () => {
 		ocultarMenu();
 		game(false);
 	});
 	
-	document.getElementById("btnClasIA").addEventListener("click", () => {
+	document.getElementById("btnClassicAI").addEventListener("click", () => {
 		ocultarMenu();
 		game(true);
 	});
 	
 
-	document.getElementById("btnEspecial").addEventListener("click", () => {
+	document.getElementById("btnCrazyTkns").addEventListener("click", () => {
 		ocultarMenu();
 		//custom();
 	});
 }
 
-handle();
+enterTheGame();

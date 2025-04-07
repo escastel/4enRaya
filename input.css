@@ -44,25 +44,26 @@ body, html {
     border: 2px solid  rgb(0, 77, 112);
     border-radius: 1%;
     height: fit-content;
-    width: 30%;
+    width: fit-content;
     margin: 2%;
     align-self: center;
     align-content: center;
     align-items: center;
     justify-content: center;
     justify-items: center;
-    display: block;
+    text-align: center;
     padding-bottom: 2%;
+    display: block;
 }
 
 h1 {
-    margin-inline: 10%;
     text-align: center;
-    width: fit-content;
     font-size: 120%;
     font-weight: 700;
     color:white;
     opacity: 80%;
+    margin-inline: 10%;
+    margin-top: 5%;
 /*  text-decoration-line: underline;
     text-decoration-color: rgb(255, 82, 157);
     text-decoration-thickness:2px; */
