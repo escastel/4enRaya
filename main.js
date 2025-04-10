@@ -20,6 +20,8 @@ function returnToMenu(){
 			document.getElementById("winner").remove()
 		if (document.getElementById("draw"))
 			document.getElementById("draw").remove()
+		if (document.getElementById("dice-container"))
+			document.getElementById("dice-container").remove()
 	}
 
 	function resetDisplay(){
@@ -50,18 +52,18 @@ function enterTheGame(){
 	
 	document.getElementById("btnClassic").addEventListener("click", () => {
 		ocultarMenu();
-		game(false);
+		classicMode(false);
 	});
 	
 	document.getElementById("btnClassicAI").addEventListener("click", () => {
 		ocultarMenu();
-		game(true);
+		classicMode(true);
 	});
 	
 
 	document.getElementById("btnCrazyTkns").addEventListener("click", () => {
 		ocultarMenu();
-		//custom();
+		crazyTokensMode(false);
 	});
 }
 
