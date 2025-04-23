@@ -240,16 +240,23 @@ function crazyTokensMode(AI) {
             const cells = columnMap.get(columnList[col].id);
 
             for (let row = 0; row < columnData.length; row++) {
-                if (columnData[row] == 0 && columnData[row + 1] && columnData[row + 1] != 0){
-                    columnData[row] = columnData[row + 1]
-                    columnData[row + 1] = 0
-                    while (cells[row + 1].firstChild){
-                        cells[row].appendChild(cells[row + 1].firstChild);
-                        cells[row + 1].removeChild(cells[row + 1].firstChild);
-                    }
+                console.log("Row: ", row, " Column: ", columnData)
+                if (columnData[row] != 0){
+                    const emptyCell = columnData.findIndex(cell => cell === 0);
+                    if (emptyCell > row)
+                        continue ;
+                    columnData[emptyCell] = columnData[row]
+                    columnData[row] = 0
+                    cells[row].className = `cell ${player1.turn ?
+                        `bg-gradient-to-r hover:from-pink-400 hover:to-red-500` :
+                        `bg-gradient-to-r hover:from-orange-400 hover:to-yellow-500`}`;
+                    cells[emptyCell].className = `filled`
+                    cells[emptyCell].appendChild(cells[row].firstChild);
+                    cells[row].removeChild(cells[row].firstChild);
                 }
             }
         }
+        console.log(boardMap)
     }
 
     function handleBomb(row, column){  // EL mapa se modifica bien, hacer que explote y la ficha bomba tambien desaparezca
@@ -262,7 +269,7 @@ function crazyTokensMode(AI) {
             if (columnList[col].id == column)
                 exploitedToken(row, columnId)
         }
-        console.log(boardMap);
+        console.log(boardMap)
         updateBoard();
     }
 
