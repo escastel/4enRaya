@@ -6,22 +6,17 @@ function returnToMenu(){
 		})
 	
 		let filleds = Array.from(document.getElementsByClassName("filled"))
-		filleds = Array.from(document.getElementsByClassName("filled"))
 		filleds.forEach(filled => {
 			filled.className = "cell bg-gradient-to-r hover:from-pink-400 hover:to-red-500"
 		})
 	
 		let tokens = Array.from(document.getElementsByClassName("token"))
 		tokens = Array.from(document.getElementsByClassName("token"))
-		tokens.forEach(token => {
-			token.remove()
-		})
-		if (document.getElementById("winner"))
-			document.getElementById("winner").remove()
-		if (document.getElementById("draw"))
-			document.getElementById("draw").remove()
-		if (document.getElementById("dice-container"))
-			document.getElementById("dice-container").remove()
+		tokens.forEach(token => { token.remove()})
+		
+		if (document.getElementById("winner")) document.getElementById("winner").remove()
+		if (document.getElementById("draw")) document.getElementById("draw").remove()
+		if (document.getElementById("dice-container")) document.getElementById("dice-container").remove()
 	}
 
 	function resetDisplay(){

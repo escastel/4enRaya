@@ -20,6 +20,7 @@ function crazyTokensMode(AI) {
             this.turn = false;
             this.winner = false;
             this.specialToken = null;
+            this.useSpecial = false;
             this.diceUses = 3;
         }
     }
@@ -38,7 +39,7 @@ function crazyTokensMode(AI) {
         player1.turn = true;
 
         for (let i = 1; i <= 7; i++) {
-            boardMap.set(("c" + i.toString()), Array(6).fill(0));
+            boardMap.set("c" + i.toString(), Array(6).fill(0));
             columnMap.set("c" + i.toString(), setArray(i.toString()));
             columnList.push(document.getElementById("c" + i.toString()));
         }
@@ -153,14 +154,16 @@ function crazyTokensMode(AI) {
             diceIcon.innerText = "❌";
             return;
         }
-        if (currentPlayer.specialToken)
-           return ;
+        if (currentPlayer.specialToken) { // Me gustaria que se guardase el token y que el jugador elija cuando usarlo
+            currentPlayer.useSpecial = true;
+            return ;
+        }
 
         diceContainer.classList.add("rolling");
         setTimeout(() => {
             const randomIndex = Math.floor(Math.random() * crazyTokens.length);
             /* const newToken = crazyTokens[randomIndex]; */
-            const newToken = "🌫️"
+            const newToken = "💣"
             
             diceIcon.innerText = newToken;
             currentPlayer.specialToken = newToken;
@@ -170,15 +173,17 @@ function crazyTokensMode(AI) {
         }, 1000);
     }
 
-    function updateCell(cell, player) {
-        const token = document.createElement("div");
+    function handleReverse(){ // Funciona. Hacerlo para que se cambie primero y luego juegues la ficha
+        for (let col = 0; col < columnList.length; col++) {
+            const columnId = columnList[col].id;
+            const columnData = boardMap.get(columnId);
 
-        token.className = `token ${player.color}`;
-        cell.className = "filled";
-        cell.appendChild(token);
-    }
+            for (let row = 0; row < columnData.length; row++) {
+                if (columnData[row] == 1) columnData[row] = 2;
+                else if (columnData[row] == 2) columnData[row] = 1;
+            }
+        }
 
-    function handleReverse(){ // Funciona. Hacerlo para que se cambie primero y luegop juegues tu
         let tokens = Array.from(document.getElementsByClassName("token red"))
         tokens.forEach(token => {
 			token.className = "token yellow special-token"
@@ -192,20 +197,79 @@ function crazyTokensMode(AI) {
         tokens.forEach(token => {
             token.classList.remove("special-token")
         })
-
     }
 
-    function handleBlind() {  // Funciona. Hacerlo para que afecte al otro jugador
+    function handleBlind() {  // Funciona. Hacerlo para que afecte al otro jugador durante 1 turno
         let tokens = Array.from(document.getElementsByClassName("token"));
         tokens.forEach(token => {
             token.style.visibility = "hidden";
         });
     }
 
-    function handleSpecialToken(position, player, column) {
+    function exploitedToken(row, columnId){
+        const cells = columnMap.get(columnId);
+        const columnData = boardMap.get(columnId);
+
+        columnData[row] = 0
+        cells[row].className = `cell ${player1.turn ?
+            `bg-gradient-to-r hover:from-pink-400 hover:to-red-500` :
+            `bg-gradient-to-r hover:from-orange-400 hover:to-yellow-500`}`;
+        while (cells[row].firstChild)
+            cells[row].removeChild(cells[row].firstChild);
+        if (columnData[row - 1] && columnData[row - 1] != 0){
+            columnData[row - 1] = 0
+            cells[row - 1].className = `cell ${player1.turn ?
+                `bg-gradient-to-r hover:from-pink-400 hover:to-red-500` :
+                `bg-gradient-to-r hover:from-orange-400 hover:to-yellow-500`}`;
+            while (cells[row - 1].firstChild)
+                cells[row - 1].removeChild(cells[row - 1].firstChild);
+        }
+        if (columnData[row + 1] && columnData[row + 1] != 0){
+            columnData[row + 1] = 0
+            cells[row + 1].className = `cell ${player1.turn ?
+                `bg-gradient-to-r hover:from-pink-400 hover:to-red-500` :
+                `bg-gradient-to-r hover:from-orange-400 hover:to-yellow-500`}`;
+            while (cells[row + 1].firstChild)
+                cells[row + 1].removeChild(cells[row + 1].firstChild);
+        }
+    }
+
+    function updateBoard(){  // Modifica bien, tengo que hacer lo de abajo, que explote.
+        for (let col = 0; col < columnList.length; col++) {
+            const columnData = boardMap.get(columnList[col].id);
+            const cells = columnMap.get(columnList[col].id);
+
+            for (let row = 0; row < columnData.length; row++) {
+                if (columnData[row] == 0 && columnData[row + 1] && columnData[row + 1] != 0){
+                    columnData[row] = columnData[row + 1]
+                    columnData[row + 1] = 0
+                    while (cells[row + 1].firstChild){
+                        cells[row].appendChild(cells[row + 1].firstChild);
+                        cells[row + 1].removeChild(cells[row + 1].firstChild);
+                    }
+                }
+            }
+        }
+    }
+
+    function handleBomb(row, column){  // EL mapa se modifica bien, hacer que explote y la ficha bomba tambien desaparezca
+        for (let col = 0; col < columnList.length; col++) {
+            const columnId = columnList[col].id;
+            if (columnList[col + 1] && columnList[col + 1].id == column)
+                exploitedToken(row, columnId)
+            if (columnList[col - 1] && columnList[col - 1].id == column)
+                exploitedToken(row, columnId)
+            if (columnList[col].id == column)
+                exploitedToken(row, columnId)
+        }
+        console.log(boardMap);
+        updateBoard();
+    }
+
+    function handleSpecialToken(row, player, column) {
         switch (player.specialToken) {
             case "💣":
-                handleBomb(player);
+                handleBomb(row, column.id);
                 break;
             case "👻":
                 handleGhost(player);
@@ -217,11 +281,9 @@ function crazyTokensMode(AI) {
                 handleDice(player);
                 break;
             case "🌀":
-                handleReverse(player);
-                updateCell(position, player);
+                handleReverse();
                 break;
             case "🌫️":
-                updateCell(position, player);
                 handleBlind();
                 break;
             default:
@@ -230,19 +292,27 @@ function crazyTokensMode(AI) {
         player.specialToken = null;
     }
 
+    function updateCell(cell, player) {
+        const token = document.createElement("div");
+
+        token.className = `token ${player.color}`;
+        cell.className = "filled";
+        cell.appendChild(token);
+    }
+
     function placeToken(column) {
+        const currentPlayer = player1.turn ? player1 : player2;
         const cells = columnMap.get(column.id);
         const columnData = boardMap.get(column.id);
         const row = columnData.findIndex(cell => cell === 0);
         if (row === -1) return;
 
-        const currentPlayer = player1.turn ? player1 : player2;
-        columnData[row] = currentPlayer.num;
+        if (currentPlayer.useSpecial)
+            handleSpecialToken(row, currentPlayer, column);
 
-        if (currentPlayer.specialToken)
-            handleSpecialToken(cells[row], currentPlayer, column);
-        else
-            updateCell(cells[row], currentPlayer);
+        columnData[row] = currentPlayer.num;
+        updateCell(cells[row], currentPlayer);
+
     }
 
     function checkDraw() {
