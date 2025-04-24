@@ -157,6 +157,9 @@ function crazyTokensMode(AI) {
         }
         if (currentPlayer.specialToken) { // Me gustaria que se guardase el token y que el jugador elija cuando usarlo
             currentPlayer.useSpecial = true;
+            diceContainer.classList.add("usingDice");
+            setTimeout(() => {diceContainer.classList.remove("usingDice")}, 1000);
+            diceContainer.style.pointerEvents = 'none'
             return ;
         }
 
@@ -309,6 +312,8 @@ function crazyTokensMode(AI) {
                 break;
         }
         player.specialToken = null;
+        document.getElementById("dice-container").style.pointerEvents = 'auto'
+        // document.getElementById("dice-container").innerText = '⚪'
     }
 
     function updateCell(cell, player) {

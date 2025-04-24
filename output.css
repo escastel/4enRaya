@@ -2072,6 +2072,9 @@ h1 {
 .rolling {
   animation: rollAnimation 1s ease-in-out;
 }
+.usingDice {
+  animation: usingAnimation 1s ease-in-out;
+}
 @keyframes rollAnimation {
   0% {
     transform: rotate(0deg);
@@ -2084,6 +2087,25 @@ h1 {
   100% {
     transform: rotate(0deg);
     background-color: #fb9d11;
+  }
+}
+@keyframes usingAnimation {
+  0% {
+    transform: rotate(50deg);
+    font-size: x-large;
+  }
+  25% {
+    transform: rotate(-50deg);
+  }
+  50% {
+    transform: rotate(25.5deg);
+  }
+  75% {
+    transform: rotate(-25.5deg);
+  }
+  100% {
+    transform: rotate(0deg);
+    font-size: large;
   }
 }
 @property --tw-translate-x {
