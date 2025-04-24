@@ -21,6 +21,7 @@ function crazyTokensMode(AI) {
             this.winner = false;
             this.specialToken = null;
             this.useSpecial = false;
+            this.affected = null;  // Si es afectado por el oponente por un token especial.
             this.diceUses = 3;
         }
     }
@@ -163,7 +164,7 @@ function crazyTokensMode(AI) {
         setTimeout(() => {
             const randomIndex = Math.floor(Math.random() * crazyTokens.length);
             /* const newToken = crazyTokens[randomIndex]; */
-            const newToken = "🎲"
+            const newToken = "🌫️"
             
             diceIcon.innerText = newToken;
             currentPlayer.specialToken = newToken;

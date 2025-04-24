@@ -134,10 +134,23 @@ function classicMode(activateAI) {
     }
 
     function placeToken(column) {
+        if (!column || !column.id) {
+            console.error("Column or column ID is invalid: ", column);
+            return;
+        }
+
         const cells = columnMap.get(column.id);
         const columnData = boardMap.get(column.id);
+        if (!cells || !columnData) {
+            console.error("Cells or columnData is undefined for column ID: ", column.id);
+            return;
+        }    
+
         const row = columnData.findIndex(cell => cell === 0);
-        if (row === -1) return;
+        if (row === -1){
+            console.error("No rows left in column: ", column);
+            return ;
+        }
 
         const currentPlayer = player1.turn ? player1 : player2;
         columnData[row] = currentPlayer.num;
