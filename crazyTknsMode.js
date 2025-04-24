@@ -163,7 +163,7 @@ function crazyTokensMode(AI) {
         setTimeout(() => {
             const randomIndex = Math.floor(Math.random() * crazyTokens.length);
             /* const newToken = crazyTokens[randomIndex]; */
-            const newToken = "💣"
+            const newToken = "🎲"
             
             diceIcon.innerText = newToken;
             currentPlayer.specialToken = newToken;
@@ -240,23 +240,21 @@ function crazyTokensMode(AI) {
             const cells = columnMap.get(columnList[col].id);
 
             for (let row = 0; row < columnData.length; row++) {
-                console.log("Row: ", row, " Column: ", columnData)
                 if (columnData[row] != 0){
                     const emptyCell = columnData.findIndex(cell => cell === 0);
-                    if (emptyCell > row)
-                        continue ;
-                    columnData[emptyCell] = columnData[row]
+                    if (emptyCell > row) continue ;
+                    columnData[emptyCell] = columnData[row] = 1 ? 1 : 2;
                     columnData[row] = 0
                     cells[row].className = `cell ${player1.turn ?
                         `bg-gradient-to-r hover:from-pink-400 hover:to-red-500` :
                         `bg-gradient-to-r hover:from-orange-400 hover:to-yellow-500`}`;
                     cells[emptyCell].className = `filled`
-                    cells[emptyCell].appendChild(cells[row].firstChild);
-                    cells[row].removeChild(cells[row].firstChild);
+                    if (cells[row].hasChildNodes())
+                        cells[emptyCell].appendChild(cells[row].firstChild);
+                    //cells[row].removeChild(cells[row].firstChild);
                 }
             }
         }
-        console.log(boardMap)
     }
 
     function handleBomb(row, column){  // EL mapa se modifica bien, hacer que explote y la ficha bomba tambien desaparezca
@@ -273,25 +271,38 @@ function crazyTokensMode(AI) {
         updateBoard();
     }
 
+	function handleLock(column){  // Hacer x 1 turno al rival, puede que añada un dado para poner x turnos.
+		document.getElementById(column.id).style.pointerEvents = 'none';
+	}
+
+	function handleGhost(){
+		// Aparece una ficha para bloquear por x turnos
+	}
+
+	function handleDice(){
+		const randomColumn = Math.floor(Math.random() * 6)
+		return columnList[randomColumn]
+	}
+
     function handleSpecialToken(row, player, column) {
         switch (player.specialToken) {
             case "💣":
-                handleBomb(row, column.id);
+                handleBomb(row, column.id); // ok, Explota 3x3
                 break;
             case "👻":
-                handleGhost(player);
+                handleGhost(player); // por hacer
                 break;
             case "🔒":
-                handleLock(player);
+                handleLock(column); // ok, Bloquea una columna x 1 turno
                 break;
             case "🎲":
-                handleDice(player);
+                handleDice(column); // remodelar, hace que pulse la columna que pulse el oponente, se coloque random
                 break;
             case "🌀":
-                handleReverse();
+                handleReverse(); // ok, Cambia las fichas amarillas por las rojas
                 break;
             case "🌫️":
-                handleBlind();
+                handleBlind(); // ok, Invisibiliza las fichas al oponente x 1 turno.
                 break;
             default:
                 break;
