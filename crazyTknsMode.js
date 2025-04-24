@@ -82,7 +82,11 @@ function crazyTokensMode(AI) {
     function handleColumnClick(column) {
         if (player1.winner || player2.winner) { stop(); return; }
 
-        placeToken(column);
+        const currentPlayer = player1.turn ? player1 : player2;
+        if (currentPlayer.useSpecial)
+            placeSpecialToken(column)
+        else
+            placeToken(column);
         if (checkWin(false)) insertDivWinner(), stop();
         else if (checkDraw()) insertDivDraw(), stop();
         else {
@@ -167,7 +171,7 @@ function crazyTokensMode(AI) {
         setTimeout(() => {
             const randomIndex = Math.floor(Math.random() * crazyTokens.length);
             /* const newToken = crazyTokens[randomIndex]; */
-            const newToken = "🌫️"
+            const newToken = "💣"
             
             diceIcon.innerText = newToken;
             currentPlayer.specialToken = newToken;
@@ -288,6 +292,28 @@ function crazyTokensMode(AI) {
 		return columnList[randomColumn]
 	}
 
+    function updateSpecialCell(cell, player) {  // Añadir animacion distinta segun token
+        const token = document.createElement("div");
+
+        token.className = `token ${player.color}`;
+        token.innerText = `${player.specialToken}`;
+        cell.className = "filled";
+        cell.appendChild(token);
+        setTimeout(() => {cell.removeChild(cell.firstChild)}, 2000);
+    }
+
+    function placeSpecialToken(column){
+        const currentPlayer = player1.turn ? player1 : player2;
+        const cells = columnMap.get(column.id);
+        const columnData = boardMap.get(column.id);
+        const row = columnData.findIndex(cell => cell === 0);
+        if (row === -1) return;
+        updateSpecialCell(cells[row], currentPlayer);
+        handleSpecialToken(row, currentPlayer, column);
+        currentPlayer.specialToken = null;
+        currentPlayer.useSpecial = false;
+    }
+
     function handleSpecialToken(row, player, column) {
         switch (player.specialToken) {
             case "💣":
@@ -311,7 +337,6 @@ function crazyTokensMode(AI) {
             default:
                 break;
         }
-        player.specialToken = null;
         document.getElementById("dice-container").style.pointerEvents = 'auto'
         // document.getElementById("dice-container").innerText = '⚪'
     }
@@ -330,10 +355,6 @@ function crazyTokensMode(AI) {
         const columnData = boardMap.get(column.id);
         const row = columnData.findIndex(cell => cell === 0);
         if (row === -1) return;
-
-        if (currentPlayer.useSpecial)
-            handleSpecialToken(row, currentPlayer, column);
-
         columnData[row] = currentPlayer.num;
         updateCell(cells[row], currentPlayer);
 
