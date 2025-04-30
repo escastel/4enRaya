@@ -127,6 +127,10 @@ h1 {
     animation-duration:1s;
     animation-name: token;
     position: relative;
+    text-align: center;
+    align-content: center;
+    justify-content: center;
+    font-size: 50%;
 }
 
 .red {
@@ -257,5 +261,26 @@ h1 {
     100% {
         transform: rotate(0deg);
         font-size: large;
+    }
+}
+
+@keyframes moveToken {
+    0% {
+        transform: translateY(-100%);
+        opacity: 1;
+        }
+    25% {
+        transform: translateY(-75%);
+        opacity: 0.8;}
+    50% {
+        transform: translateY(-50%);
+        opacity: 0.5;
+    }
+    75% {
+        transform: translateY(-25%);
+        opacity: 0.8;}
+    100% {
+        transform: translateY(0);
+        opacity: 1;
     }
 }

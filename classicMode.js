@@ -77,7 +77,6 @@ function classicMode(activateAI) {
         if (checkWin(false)) insertDivWinner(), stop();
         else if (checkDraw()) insertDivDraw(), stop();
         else {
-            updateTurnIndicator();
             if (player2.turn && player2.AI) {
                 disableClicks();
                 timeAI = setTimeout(() => {
@@ -156,6 +155,7 @@ function classicMode(activateAI) {
         columnData[row] = currentPlayer.num;
 
         updateCell(cells[row], currentPlayer);
+        updateTurnIndicator();
     }
 
     function checkDraw() {
