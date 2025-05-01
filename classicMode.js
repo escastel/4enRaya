@@ -36,6 +36,7 @@ function classicMode(activateAI) {
         for (let i = 1; i <= 7; i++) {
             boardMap.set(("c" + i.toString()), Array(6).fill(0));
             columnMap.set("c" + i.toString(), setArray(i.toString()));
+            console.log("Column: ", i, "Cells: ", columnMap.get("c" + i.toString()));
             columnList.push(document.getElementById("c" + i.toString()));
         }
     }
@@ -156,7 +157,7 @@ function classicMode(activateAI) {
         const cells = columnMap.get(column.id);
         const columnData = boardMap.get(column.id);
         if (!cells || !columnData) {
-            console.error("Cells or columnData is undefined for column ID: ", column.id);
+            console.error("Cells or columnData is undefined for column ID: ", column.id, columnMap);
             return;
         }    
 
