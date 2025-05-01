@@ -85,14 +85,15 @@ function crazyTokensMode(AI) {
             await disableEffects(currentPlayer);
 
         if (currentPlayer.useSpecial)
-            placeSpecialToken(column)
+            await placeSpecialToken(column)
         else if (currentPlayer.affected && currentPlayer.affected === "🎲"){
             const randomColumn = columnList[Math.floor(Math.random() * columnList.length)];
-            placeToken(randomColumn);
+            await placeToken(randomColumn);
             await disableEffects(currentPlayer);
         }
         else
-            placeToken(column);
+            await placeToken(column);
+        console.log("Mapa:", boardMap) // Borrar
         if (checkWin(false)) insertDivWinner(), stop();
         else if (checkDraw()) insertDivDraw(), stop();
         else {
@@ -103,7 +104,6 @@ function crazyTokensMode(AI) {
                 enableClicks();
             }
         }
-        console.log("Mapa:", boardMap) // Borrar
     }
 
     function insertDice() {
@@ -125,6 +125,8 @@ function crazyTokensMode(AI) {
         winner.id = `winner`
         winner.innerHTML = `¡El <span>${player}</span> ha ganado!`;
         document.getElementById("board").appendChild(winner);
+        document.getElementById("dice-container").style.pointerEvents = 'none';
+        document.getElementById("board").style.pointerEvents = 'none';
     }
 
     function insertDivDraw() {
@@ -134,6 +136,8 @@ function crazyTokensMode(AI) {
         draw.id = `draw`
         draw.innerText = `¡Empate!`;
         document.getElementById("board").appendChild(draw);
+        document.getElementById("dice-container").style.pointerEvents = 'none';
+        document.getElementById("board").style.pointerEvents = 'none';
     }
 
     async function updateTurnIndicator() {
@@ -178,8 +182,7 @@ function crazyTokensMode(AI) {
         diceContainer.classList.add("rolling");
         await delay(1000);
         const randomIndex = Math.floor(Math.random() * crazyTokens.length);
-        /* const newToken = crazyTokens[randomIndex]; */
-        const newToken = "🌀"
+        const newToken = crazyTokens[randomIndex];
         
         diceIcon.innerText = newToken;
         currentPlayer.specialToken = newToken;
@@ -379,7 +382,7 @@ function crazyTokensMode(AI) {
         const token = document.createElement("div");
         token.className = `token ${player.color}`;
         if (player.specialToken === "👻")
-            token.classList.add("ghost", "opacity-50");
+            token.classList.add("ghost", "opacity-50", "grayscale");
         token.innerText = `${player.specialToken}`;
         cell.className = "filled";
         cell.appendChild(token);
@@ -394,7 +397,10 @@ function crazyTokensMode(AI) {
         const columnData = boardMap.get(column.id);
         const row = columnData.findIndex(cell => cell === 0);
         if (row === -1) return;
-        columnData[row] = currentPlayer.num;
+        if (currentPlayer.specialToken === "👻")
+            columnData[row] = 3;
+        else
+            columnData[row] = currentPlayer.num;
 
         await updateSpecialCell(cells[row], currentPlayer);
         document.getElementById("board").style.pointerEvents = 'none';
@@ -422,7 +428,7 @@ function crazyTokensMode(AI) {
             await handleDice();
             break;
           case "🌀":
-            await handleReverse();  // Me gustaria que primero se cambie y luego juegues la ficha
+            await handleReverse();
             break;
           case "🌫️":
             await handleBlind(player);
@@ -484,7 +490,8 @@ function crazyTokensMode(AI) {
                 if (currentPlayer === 0) continue;
 
                 if (checkDirection(col, row, currentPlayer, directions)) {
-                    if (!checking) player2.turn ? player1.winner = true : player2.winner = true;
+                    if (!checking) 
+                        player1.num === currentPlayer ? player1.winner = true : player2.winner = true;
                     return true;
                 }
             }

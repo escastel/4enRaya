@@ -1,5 +1,10 @@
 function returnToMenu(){
 	function resetDivs(){
+		let columns = Array.from(document.getElementsByClassName("column"))
+		columns.forEach(column => {
+			column.className = "column flex flex-col items-center"
+		})
+
 		let cells = Array.from(document.getElementsByClassName("cell"))
 		cells.forEach(cell => {
 			cell.className = "cell bg-gradient-to-r hover:from-pink-400 hover:to-red-500"
@@ -11,7 +16,6 @@ function returnToMenu(){
 		})
 	
 		let tokens = Array.from(document.getElementsByClassName("token"))
-		tokens = Array.from(document.getElementsByClassName("token"))
 		tokens.forEach(token => { token.remove()})
 		
 		if (document.getElementById("winner")) document.getElementById("winner").remove()
