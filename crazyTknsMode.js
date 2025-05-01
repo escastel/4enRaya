@@ -179,7 +179,7 @@ function crazyTokensMode(AI) {
         await delay(1000);
         const randomIndex = Math.floor(Math.random() * crazyTokens.length);
         /* const newToken = crazyTokens[randomIndex]; */
-        const newToken = "🎲"
+        const newToken = "🌀"
         
         diceIcon.innerText = newToken;
         currentPlayer.specialToken = newToken;
@@ -189,7 +189,7 @@ function crazyTokensMode(AI) {
     }
 
     function handleReverse(){ // ¿Cambiar todas las fichas de color o solo cambiarlas de propietario?
-        /* for (let col = 0; col < columnList.length; col++) {
+        for (let col = 0; col < columnList.length; col++) {
             const columnId = columnList[col].id;
             const columnData = boardMap.get(columnId);
 
@@ -210,7 +210,7 @@ function crazyTokensMode(AI) {
                 token.classList.add("red");
             }
             token.innerText = "";
-		}) */
+		})
         player1.color === "red" ? player1.color = "yellow" : player1.color = "red";
         player2.color === "yellow" ? player2.color = "red" : player2.color = "yellow";
         player1.num === 1 ? player1.num = 2 : player1.num = 1;
