@@ -174,7 +174,7 @@ function crazyTokensMode(AI) {
         await delay(1000);
         const randomIndex = Math.floor(Math.random() * crazyTokens.length);
         /* const newToken = crazyTokens[randomIndex]; */
-        const newToken = "🌀"
+        const newToken = "👻"
         
         diceIcon.innerText = newToken;
         currentPlayer.specialToken = newToken;
@@ -183,8 +183,8 @@ function crazyTokensMode(AI) {
         diceContainer.classList.remove("rolling");
     }
 
-    function handleReverse(){ // Funciona. Hacerlo para que se cambie primero y luego juegues la ficha
-        for (let col = 0; col < columnList.length; col++) {
+    function handleReverse(){ // ¿Cambiar todas las fichas de color o solo cambiarlas de propietario?
+        /* for (let col = 0; col < columnList.length; col++) {
             const columnId = columnList[col].id;
             const columnData = boardMap.get(columnId);
 
@@ -205,7 +205,7 @@ function crazyTokensMode(AI) {
                 token.classList.add("red");
             }
             token.innerText = "";
-		})
+		}) */
         player1.color === "red" ? player1.color = "yellow" : player1.color = "red";
         player2.color === "yellow" ? player2.color = "red" : player2.color = "yellow";
         player1.num === 1 ? player1.num = 2 : player1.num = 1;
@@ -299,6 +299,13 @@ function crazyTokensMode(AI) {
         });
     }
 
+    function disableGhost(){
+        let tokens = Array.from(document.getElementsByClassName("ghost"));
+        tokens.forEach((token) => {
+            token.remove();
+        });
+    }
+
     function disableEffects(currentPlayer){
         switch (currentPlayer.affected) {
             case "🔒":
@@ -306,6 +313,9 @@ function crazyTokensMode(AI) {
                 break;
             case "🌫️":
                 disableBlind();
+                break;
+            case "👻":
+                disableGhost();
                 break;
         }
         currentPlayer.affected = null;
@@ -322,25 +332,14 @@ function crazyTokensMode(AI) {
     } 
 
 	
-    async function handleGhost(player, column) {
-        const cells = columnMap.get(column.id);
-        const columnData = boardMap.get(column.id);
-        const row = columnData.findIndex(cell => cell === 0);
-        if (row === -1) return;
-    
-        columnData[row] = player.num;
-        const cell = cells[row];
-        const token = document.createElement("div");
-        token.className = `token ${player.color}`;
-        token.innerText = "👻";
-        cell.className = "filled ghost";
-        cell.appendChild(token);
-    
-        await delay(3000);
-    
-        columnData[row] = 0;
-        cell.className = "cell";
-        cell.innerHTML = "";
+    async function handleGhost() {
+        const opponent = player1.turn ? player2 : player1;
+        const currentPlayer = player1.turn ? player1 : player2;
+
+        player1.turn = !player1.turn;
+        player2.turn = !player2.turn;
+        opponent.affected = currentPlayer === player1 ? player1.specialToken : player2.specialToken;
+        opponent.turnAffected = 1;
     } 
 
 	function handleDice(){
@@ -350,7 +349,10 @@ function crazyTokensMode(AI) {
 
     async function updateSpecialCell(cell, player) {
         const token = document.createElement("div");
-        token.className = `token ${player.color}`;
+        if (player.specialToken === "👻")
+            token.className = `token ${player.color} ghost`;
+        else
+            token.className = `token ${player.color}`;
         token.innerText = `${player.specialToken}`;
         cell.className = "filled";
         cell.appendChild(token);
@@ -359,20 +361,23 @@ function crazyTokensMode(AI) {
 
     async function placeSpecialToken(column) {
         disableClicks();
+
         const currentPlayer = player1.turn ? player1 : player2;
         const cells = columnMap.get(column.id);
         const columnData = boardMap.get(column.id);
         const row = columnData.findIndex(cell => cell === 0);
         if (row === -1) return;
         columnData[row] = currentPlayer.num;
+
         await updateSpecialCell(cells[row], currentPlayer);
         document.getElementById("board").style.pointerEvents = 'none';
         await handleSpecialToken(row, currentPlayer, column);
-        currentPlayer.specialToken = null;
-        currentPlayer.useSpecial = false;
         document.getElementById("board").style.pointerEvents = 'auto';
         await updateTurnIndicator();
+
         enableClicks();
+        currentPlayer.specialToken = null;
+        currentPlayer.useSpecial = false;
     }
 
     async function handleSpecialToken(row, player, column) {
@@ -390,7 +395,7 @@ function crazyTokensMode(AI) {
             handleDiceEffect(player);
             break;
           case "🌀":
-            await handleReverse();
+            await handleReverse();  // Me gustaria que primero se cambie y luego juegues la ficha
             break;
           case "🌫️":
             await handleBlind(player);
