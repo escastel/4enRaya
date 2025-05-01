@@ -20,6 +20,8 @@ function classicMode(activateAI) {
     const player1 = new Player(false, 1, "red");
     const player2 = new Player(activateAI, 2, "yellow");
 
+    /* Initialization Functionality */
+
     function setArray(num) {
         let array = new Array();
 
@@ -56,6 +58,8 @@ function classicMode(activateAI) {
         clearGame()
     }
 
+    /* Click Functionality */
+
     function enableClicks() {
         columnList.forEach((column) => {
             column.style.pointerEvents = "auto";
@@ -67,6 +71,8 @@ function classicMode(activateAI) {
             column.style.pointerEvents = "none";
         });
     }
+
+    /* Handle Column Click */
 
     async function handleColumnClick(column) {
         if (player1.winner || player2.winner) { stop(); return; }
@@ -83,6 +89,8 @@ function classicMode(activateAI) {
             }
         }
     }
+
+    /* Insert Div Win / Draw */
 
     function insertDivWinner() {
         const winner = document.createElement("div");
@@ -106,6 +114,8 @@ function classicMode(activateAI) {
         disableClicks();
     }
 
+    /* Turn Indicator */
+
     async function updateTurnIndicator() {
         player1.turn = !player1.turn;
         player2.turn = !player2.turn;
@@ -122,8 +132,10 @@ function classicMode(activateAI) {
                 }
             });
         });
-        console.log(`Turn: ${currentPlayer}, color: ${currentPlayer.color}`);
+        console.log(`Turn: ${currentPlayer.num}, color: ${currentPlayer.color}`);
     }
+
+    /* Place Token Functionality */
 
     async function updateCell(cell, player) {
         const token = document.createElement("div");
@@ -161,6 +173,8 @@ function classicMode(activateAI) {
         await delay(1000);
         enableClicks();
     }
+
+    /* Check Win / Draw */
 
     function checkDraw() {
         let draw = true;
@@ -221,6 +235,8 @@ function classicMode(activateAI) {
         }
         return false;
     }
+
+    /* AI Functionality */
 
     async function aiToken() {
         let bestScore = -Infinity;
@@ -293,6 +309,8 @@ function classicMode(activateAI) {
         });
         return score;
     }
+
+    /* Utils */
 
     function delay(ms) {
         return new Promise(resolve => setTimeout(resolve, ms));
