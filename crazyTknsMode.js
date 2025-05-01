@@ -82,7 +82,7 @@ function crazyTokensMode(AI) {
 
         const currentPlayer = player1.turn ? player1 : player2;
         if (currentPlayer.affected && currentPlayer.turnAffected > 0)
-            disableEffects(currentPlayer);
+            await disableEffects(currentPlayer);
 
         if (currentPlayer.useSpecial)
             placeSpecialToken(column)
@@ -299,14 +299,26 @@ function crazyTokensMode(AI) {
         });
     }
 
-    function disableGhost(){
+    async function disableGhost() {
         let tokens = Array.from(document.getElementsByClassName("ghost"));
-        tokens.forEach((token) => {
+        for (const token of tokens) {
+            const columnId = token.parentElement.parentElement.id;
+            const columnData = boardMap.get(columnId);
+            const row = Array.from(columnMap.get(columnId)).indexOf(document.getElementById(token.parentElement.id));
+            if (row !== -1) {
+                columnData[row] = 0;
+            }
+    
+            token.parentElement.className = `cell ${player1.turn ?
+                `bg-gradient-to-r hover:from-pink-400 hover:to-red-500` :
+                `bg-gradient-to-r hover:from-orange-400 hover:to-yellow-500`}`;
             token.remove();
-        });
+            await delay(300);
+            await updateBoard(columnId);
+        }
     }
 
-    function disableEffects(currentPlayer){
+    async function disableEffects(currentPlayer){
         switch (currentPlayer.affected) {
             case "🔒":
                 disableLock();
@@ -315,7 +327,7 @@ function crazyTokensMode(AI) {
                 disableBlind();
                 break;
             case "👻":
-                disableGhost();
+                await disableGhost();
                 break;
         }
         currentPlayer.affected = null;
@@ -343,16 +355,16 @@ function crazyTokensMode(AI) {
     } 
 
 	function handleDice(){
-		const randomColumn = Math.floor(Math.random() * 6)
-		return columnList[randomColumn]
+		const opponent = player1.turn ? player2 : player1;
+        opponent.affected = player1.turn ? player1.specialToken : player2.specialToken;
+        opponent.turnAffected = 1;
 	}
 
     async function updateSpecialCell(cell, player) {
         const token = document.createElement("div");
+        token.className = `token ${player.color}`;
         if (player.specialToken === "👻")
-            token.className = `token ${player.color} ghost`;
-        else
-            token.className = `token ${player.color}`;
+            token.classList.add("ghost", "opacity-50");
         token.innerText = `${player.specialToken}`;
         cell.className = "filled";
         cell.appendChild(token);
