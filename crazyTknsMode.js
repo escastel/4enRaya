@@ -81,8 +81,7 @@ function crazyTokensMode(AI) {
         if (player1.winner || player2.winner) { stop(); return; }
 
         const currentPlayer = player1.turn ? player1 : player2;
-        if (currentPlayer.affected && currentPlayer.turnAffected > 0) currentPlayer.turnAffected--;
-        else if (currentPlayer.affected && currentPlayer.turnAffected == 0)
+        if (currentPlayer.affected && currentPlayer.turnAffected > 0)
             disableEffects(currentPlayer);
 
         if (currentPlayer.useSpecial)
@@ -99,6 +98,7 @@ function crazyTokensMode(AI) {
                 enableClicks();
             }
         }
+        console.log("Mapa:", boardMap) // Borrar
     }
 
     function insertDice() {
@@ -131,22 +131,24 @@ function crazyTokensMode(AI) {
         document.getElementById("board").appendChild(draw);
     }
 
-    function updateTurnIndicator() {
+    async function updateTurnIndicator() {
         player1.turn = !player1.turn;
         player2.turn = !player2.turn;
 
+        const currentPlayer = player1.turn ? player1 : player2;
         columnList.forEach((column) => {
             const cells = columnMap.get(column.id);
 
             cells.forEach((cell) => {
                 if (cell.classList.contains("cell") && !player2.AI) {
-                    cell.className = `cell ${player1.turn ?
+                    cell.className = `cell ${currentPlayer.color === "red" ?
                         `bg-gradient-to-r hover:from-pink-400 hover:to-red-500` :
                         `bg-gradient-to-r hover:from-orange-400 hover:to-yellow-500`}`;
                 }
             });
         });
-        document.getElementById("dice-container").style.backgroundColor = `${player1.turn ? `rgba(255, 2, 2, 0.811)` : `rgba(255, 237, 35, 0.874)`}`;
+        document.getElementById("dice-container").style.backgroundColor = `${currentPlayer.color === "red" ? 
+            `rgba(255, 2, 2, 0.811)` : `rgba(255, 237, 35, 0.874)`}`;
         document.getElementById("dice-container").style.transition = `background-color 0.5s ease-in-out`; 
     }
 
@@ -172,7 +174,7 @@ function crazyTokensMode(AI) {
         await delay(1000);
         const randomIndex = Math.floor(Math.random() * crazyTokens.length);
         /* const newToken = crazyTokens[randomIndex]; */
-        const newToken = "🔒"
+        const newToken = "🌀"
         
         diceIcon.innerText = newToken;
         currentPlayer.specialToken = newToken;
@@ -191,28 +193,35 @@ function crazyTokensMode(AI) {
                 else if (columnData[row] == 2) columnData[row] = 1;
             }
         }
-
-        let tokens = Array.from(document.getElementsByClassName("token red"))
+        console.log("Mapa:", boardMap) // Borrar
+        let tokens = Array.from(document.getElementsByClassName("token"))
         tokens.forEach(token => {
-			token.className = "token yellow special-token"
+			if (token.classList.contains("red")) {
+                token.classList.remove("red");
+                token.classList.add("yellow");
+            } 
+            else if (token.classList.contains("yellow")) {
+                token.classList.remove("yellow");
+                token.classList.add("red");
+            }
+            token.innerText = "";
 		})
-        tokens = Array.from(document.getElementsByClassName("token yellow"))
-        tokens.forEach(token => {
-            if (!token.classList.contains("special-token"))
-                token.className = "token red special-token"
-		})
-        tokens = Array.from(document.getElementsByClassName("special-token"))
-        tokens.forEach(token => {
-            token.classList.remove("special-token")
-        })
+        player1.color === "red" ? player1.color = "yellow" : player1.color = "red";
+        player2.color === "yellow" ? player2.color = "red" : player2.color = "yellow";
+        player1.num === 1 ? player1.num = 2 : player1.num = 1;
+        player2.num === 2 ? player2.num = 1 : player2.num = 2;
     }
 
-    function handleBlind() {  // Funciona. Hacerlo para que afecte al otro jugador durante 1 turno
+    async function handleBlind(player) {
+        const opponent = player === player1 ? player2 : player1;
+        opponent.affected = player === player1 ? player1.specialToken : player2.specialToken;
+        opponent.turnAffected = 1;
+
         let tokens = Array.from(document.getElementsByClassName("token"));
         tokens.forEach(token => {
-            token.style.visibility = "hidden";
+            token.style.backgroundColor = "gray";
         });
-    }
+      } 
 
     async function updateBoard(colId){
         const columnData = boardMap.get(colId);
@@ -223,6 +232,7 @@ function crazyTokensMode(AI) {
                 const emptyCell = columnData.findIndex(cell => cell === 0);
                 if (emptyCell > row) continue ;
                 columnData[emptyCell] = columnData[row] = 1 ? 1 : 2;
+                columnData[row] = 0;
                 if (cells[row].hasChildNodes()){
                     const token = cells[row].firstChild;
                     token.style.animationName = 'none';
@@ -275,6 +285,18 @@ function crazyTokensMode(AI) {
             column.classList.remove("opacity-50");
             column.style.pointerEvents = "auto";
         });
+        let tokens = Array.from(document.getElementsByClassName("token"));
+        tokens.forEach((token) => {
+            token.innerText = "";
+        });
+    }
+
+    function disableBlind(){
+        let tokens = Array.from(document.getElementsByClassName("token"));
+        tokens.forEach((token) => {
+            token.style.backgroundColor = token.classList.contains("red") ? "red" : "yellow";
+            token.innerText = "";
+        });
     }
 
     function disableEffects(currentPlayer){
@@ -282,8 +304,12 @@ function crazyTokensMode(AI) {
             case "🔒":
                 disableLock();
                 break;
+            case "🌫️":
+                disableBlind();
+                break;
         }
         currentPlayer.affected = null;
+        currentPlayer.turnAffected = 0;
     }
 
     async function handleLock(column, player) {
@@ -332,19 +358,21 @@ function crazyTokensMode(AI) {
     }
 
     async function placeSpecialToken(column) {
+        disableClicks();
         const currentPlayer = player1.turn ? player1 : player2;
         const cells = columnMap.get(column.id);
         const columnData = boardMap.get(column.id);
         const row = columnData.findIndex(cell => cell === 0);
         if (row === -1) return;
-      
+        columnData[row] = currentPlayer.num;
         await updateSpecialCell(cells[row], currentPlayer);
         document.getElementById("board").style.pointerEvents = 'none';
         await handleSpecialToken(row, currentPlayer, column);
         currentPlayer.specialToken = null;
         currentPlayer.useSpecial = false;
         document.getElementById("board").style.pointerEvents = 'auto';
-        updateTurnIndicator();
+        await updateTurnIndicator();
+        enableClicks();
     }
 
     async function handleSpecialToken(row, player, column) {
@@ -382,7 +410,8 @@ function crazyTokensMode(AI) {
         cell.appendChild(token);
     }
 
-    function placeToken(column) {
+    async function placeToken(column) {
+        disableClicks();
         const currentPlayer = player1.turn ? player1 : player2;
         const cells = columnMap.get(column.id);
         const columnData = boardMap.get(column.id);
@@ -390,10 +419,12 @@ function crazyTokensMode(AI) {
         if (row === -1) return;
         columnData[row] = currentPlayer.num;
         updateCell(cells[row], currentPlayer);
-        updateTurnIndicator();
+        await updateTurnIndicator();
+        await delay(1000);
+        enableClicks();
     }
 
-    function checkDraw() {
+    function checkDraw() {  // Da error porque findIndex devuelve -1 ns porque
         let draw = true;
 
         columnList.forEach((column) => {
@@ -421,7 +452,7 @@ function crazyTokensMode(AI) {
                 if (currentPlayer === 0) continue;
 
                 if (checkDirection(col, row, currentPlayer, directions)) {
-                    if (!checking) player1.turn ? player1.winner = true : player2.winner = true;
+                    if (!checking) player2.turn ? player1.winner = true : player2.winner = true;
                     return true;
                 }
             }
