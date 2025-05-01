@@ -1,5 +1,4 @@
 function classicMode(activateAI) {
-    let timeAI;
     let columnMap = new Map();
     let columnList = new Array();
     let boardMap = new Map();
@@ -41,7 +40,7 @@ function classicMode(activateAI) {
 
     function start() {
         init();
-
+        enableClicks();
         columnList.forEach((column) => {
             column.addEventListener("click", () => handleColumnClick(column));
         });
@@ -55,7 +54,6 @@ function classicMode(activateAI) {
 
     function stop() {
         clearGame()
-        clearTimeout(timeAI);
     }
 
     function enableClicks() {
@@ -70,19 +68,18 @@ function classicMode(activateAI) {
         });
     }
 
-    function handleColumnClick(column) {
+    async function handleColumnClick(column) {
         if (player1.winner || player2.winner) { stop(); return; }
 
-        placeToken(column);
+        await placeToken(column);
         if (checkWin(false)) insertDivWinner(), stop();
         else if (checkDraw()) insertDivDraw(), stop();
         else {
             if (player2.turn && player2.AI) {
                 disableClicks();
-                timeAI = setTimeout(() => {
-                    aiToken();
-                    enableClicks();
-                }, 1000);
+                console.log("AI is thinking...");
+                await aiToken();
+                console.log("AI token placed");
             }
         }
     }
@@ -96,6 +93,7 @@ function classicMode(activateAI) {
         winner.id = `winner`
         winner.innerHTML = `¡El <span>${player}</span> ha ganado!`;
         document.getElementById("board").appendChild(winner);
+        disableClicks();
     }
 
     function insertDivDraw() {
@@ -105,26 +103,29 @@ function classicMode(activateAI) {
         draw.id = `draw`
         draw.innerText = `¡Empate!`;
         document.getElementById("board").appendChild(draw);
+        disableClicks();
     }
 
-    function updateTurnIndicator() {
+    async function updateTurnIndicator() {
         player1.turn = !player1.turn;
         player2.turn = !player2.turn;
 
+        const currentPlayer = player1.turn ? player1 : player2;
         columnList.forEach((column) => {
             const cells = columnMap.get(column.id);
 
             cells.forEach((cell) => {
                 if (cell.classList.contains("cell") && !player2.AI) {
-                    cell.className = `cell ${player1.turn ?
+                    cell.className = `cell ${currentPlayer.color === "red" ?
                         `bg-gradient-to-r hover:from-pink-400 hover:to-red-500` :
                         `bg-gradient-to-r hover:from-orange-400 hover:to-yellow-500`}`;
                 }
             });
         });
+        console.log(`Turn: ${currentPlayer}, color: ${currentPlayer.color}`);
     }
 
-    function updateCell(cell, player) {
+    async function updateCell(cell, player) {
         const token = document.createElement("div");
 
         token.className = `token ${player.color}`;
@@ -132,7 +133,8 @@ function classicMode(activateAI) {
         cell.appendChild(token);
     }
 
-    function placeToken(column) {
+    async function placeToken(column) {
+        disableClicks();
         if (!column || !column.id) {
             console.error("Column or column ID is invalid: ", column);
             return;
@@ -154,8 +156,10 @@ function classicMode(activateAI) {
         const currentPlayer = player1.turn ? player1 : player2;
         columnData[row] = currentPlayer.num;
 
-        updateCell(cells[row], currentPlayer);
-        updateTurnIndicator();
+        await updateCell(cells[row], currentPlayer);
+        await updateTurnIndicator();
+        await delay(1000);
+        enableClicks();
     }
 
     function checkDraw() {
@@ -186,7 +190,8 @@ function classicMode(activateAI) {
                 if (currentPlayer === 0) continue;
 
                 if (checkDirection(col, row, currentPlayer, directions)) {
-                    if (!checking) player1.turn ? player1.winner = true : player2.winner = true;
+                    if (!checking) 
+                        player1.num === currentPlayer ? player1.winner = true : player2.winner = true;
                     return true;
                 }
             }
@@ -217,7 +222,7 @@ function classicMode(activateAI) {
         return false;
     }
 
-    function aiToken() {
+    async function aiToken() {
         let bestScore = -Infinity;
         let bestColumn = null;
 
@@ -289,12 +294,14 @@ function classicMode(activateAI) {
         return score;
     }
 
+    function delay(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
     document.getElementById("btnMn").addEventListener("click", () => {
         stop();
         returnToMenu();
     });
+
     start();
 }
-
-
-
