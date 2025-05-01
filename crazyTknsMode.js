@@ -81,11 +81,16 @@ function crazyTokensMode(AI) {
         if (player1.winner || player2.winner) { stop(); return; }
 
         const currentPlayer = player1.turn ? player1 : player2;
-        if (currentPlayer.affected && currentPlayer.turnAffected > 0)
+        if (currentPlayer.affected && currentPlayer.affected != "🎲" && currentPlayer.turnAffected > 0)
             await disableEffects(currentPlayer);
 
         if (currentPlayer.useSpecial)
             placeSpecialToken(column)
+        else if (currentPlayer.affected && currentPlayer.affected === "🎲"){
+            const randomColumn = columnList[Math.floor(Math.random() * columnList.length)];
+            placeToken(randomColumn);
+            await disableEffects(currentPlayer);
+        }
         else
             placeToken(column);
         if (checkWin(false)) insertDivWinner(), stop();
@@ -174,7 +179,7 @@ function crazyTokensMode(AI) {
         await delay(1000);
         const randomIndex = Math.floor(Math.random() * crazyTokens.length);
         /* const newToken = crazyTokens[randomIndex]; */
-        const newToken = "👻"
+        const newToken = "🎲"
         
         diceIcon.innerText = newToken;
         currentPlayer.specialToken = newToken;
@@ -318,6 +323,13 @@ function crazyTokensMode(AI) {
         }
     }
 
+    async function disableDice() {
+        let tokens = Array.from(document.getElementsByClassName("token"));
+        tokens.forEach((token) => {
+            token.innerText = "";
+        });
+    }
+
     async function disableEffects(currentPlayer){
         switch (currentPlayer.affected) {
             case "🔒":
@@ -328,6 +340,9 @@ function crazyTokensMode(AI) {
                 break;
             case "👻":
                 await disableGhost();
+                break;
+            case "🎲":
+                await disableDice();
                 break;
         }
         currentPlayer.affected = null;
@@ -354,7 +369,7 @@ function crazyTokensMode(AI) {
         opponent.turnAffected = 1;
     } 
 
-	function handleDice(){
+	async function handleDice(){
 		const opponent = player1.turn ? player2 : player1;
         opponent.affected = player1.turn ? player1.specialToken : player2.specialToken;
         opponent.turnAffected = 1;
@@ -404,7 +419,7 @@ function crazyTokensMode(AI) {
             await handleLock(column, player);
             break;
           case "🎲":
-            handleDiceEffect(player);
+            await handleDice();
             break;
           case "🌀":
             await handleReverse();  // Me gustaria que primero se cambie y luego juegues la ficha
