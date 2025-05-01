@@ -77,6 +77,7 @@ function classicMode(activateAI) {
     async function handleColumnClick(column) {
         if (player1.winner || player2.winner) { stop(); return; }
 
+        console.log("Column clicked: ", column.id, "\nPlayer: ", player1.turn ? player1.num : player2.num, "\nBoard: ", boardMap);
         await placeToken(column);
         if (checkWin(false)) insertDivWinner(), stop();
         else if (checkDraw()) insertDivDraw(), stop();
@@ -181,6 +182,10 @@ function classicMode(activateAI) {
 
         columnList.forEach((column) => {
             const columnData = boardMap.get(column.id);
+            if (!columnData) {
+                console.error("Column data is undefined for column ID: ", column.id);
+                return;
+            }
             const row = columnData.findIndex(cell => cell === 0);
             if (row != -1) draw = false;
         });
