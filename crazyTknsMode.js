@@ -72,7 +72,8 @@ function crazyTokensMode(AI) {
 
     function enableClicks() {
         columnList.forEach((column) => {
-            column.style.pointerEvents = "auto";
+            if (!column.classList.contains("opacity-50"))
+                column.style.pointerEvents = "auto";
         });
     }
 
@@ -91,7 +92,12 @@ function crazyTokensMode(AI) {
         if (currentPlayer.affected && currentPlayer.affected != "🎲" && currentPlayer.turnAffected > 0)
             await disableEffects(currentPlayer);
 
-        if (currentPlayer.useSpecial)
+        if (currentPlayer.useSpecial && currentPlayer.affected === "🎲"){
+            const randomColumn = columnList[Math.floor(Math.random() * columnList.length)];
+            await placeSpecialToken(randomColumn);
+            await disableEffects(currentPlayer);
+        }
+        else if (currentPlayer.useSpecial)
             await placeSpecialToken(column)
         else if (currentPlayer.affected && currentPlayer.affected === "🎲"){
             const randomColumn = columnList[Math.floor(Math.random() * columnList.length)];
@@ -167,9 +173,18 @@ function crazyTokensMode(AI) {
             });
         });
 
-        document.getElementById("dice-container").style.backgroundColor = `${currentPlayer.color === "red" ? 
+        const diceContainer = document.getElementById("dice-container");
+        diceContainer.style.backgroundColor = `${currentPlayer.color === "red" ? 
             `rgba(255, 2, 2, 0.811)` : `rgba(255, 237, 35, 0.874)`}`;
-        document.getElementById("dice-container").style.transition = `background-color 0.5s ease-in-out`; 
+        diceContainer.style.transition = `background-color 0.5s ease-in-out`;
+        
+        const diceIcon = document.getElementById("dice-icon");
+        if (currentPlayer.specialToken != null)
+            diceIcon.innerText = `${currentPlayer.specialToken}`
+        else if (!currentPlayer.specialToken && currentPlayer.diceUses == 0)
+            diceIcon.innerText = `❌`;
+        else
+            diceIcon.innerText = `⚪`
         
         console.log(`Turn: ${currentPlayer.num}, color: ${currentPlayer.color}`);
     }
