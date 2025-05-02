@@ -156,6 +156,24 @@ function crazyTokensMode(AI) {
 
     /* Turn Indicator */
 
+    function updateDice() {
+        const currentPlayer = player1.turn ? player1 : player2;
+
+        const diceContainer = document.getElementById("dice-container");
+        diceContainer.style.backgroundColor = `${currentPlayer.color === "red" ? 
+            `rgba(255, 2, 2, 0.811)` : `rgba(255, 237, 35, 0.874)`}`;
+        diceContainer.style.transition = `background-color 0.5s ease-in-out`;
+        
+        const diceIcon = document.getElementById("dice-icon");
+        if (currentPlayer.specialToken != null)
+            diceIcon.innerText = `${currentPlayer.specialToken}`
+        else if (!currentPlayer.specialToken && currentPlayer.diceUses == 0)
+            diceIcon.innerText = `❌`;
+        else
+            diceIcon.innerText = `⚪`
+        
+    }
+
     async function updateTurnIndicator() {
         player1.turn = !player1.turn;
         player2.turn = !player2.turn;
@@ -172,20 +190,7 @@ function crazyTokensMode(AI) {
                 }
             });
         });
-
-        const diceContainer = document.getElementById("dice-container");
-        diceContainer.style.backgroundColor = `${currentPlayer.color === "red" ? 
-            `rgba(255, 2, 2, 0.811)` : `rgba(255, 237, 35, 0.874)`}`;
-        diceContainer.style.transition = `background-color 0.5s ease-in-out`;
-        
-        const diceIcon = document.getElementById("dice-icon");
-        if (currentPlayer.specialToken != null)
-            diceIcon.innerText = `${currentPlayer.specialToken}`
-        else if (!currentPlayer.specialToken && currentPlayer.diceUses == 0)
-            diceIcon.innerText = `❌`;
-        else
-            diceIcon.innerText = `⚪`
-        
+        updateDice();
         console.log(`Turn: ${currentPlayer.num}, color: ${currentPlayer.color}`);
     }
       
@@ -403,14 +408,14 @@ function crazyTokensMode(AI) {
             column.classList.remove("opacity-50");
             column.style.pointerEvents = "auto";
         });
-        let tokens = Array.from(document.getElementsByClassName("token"));
+        let tokens = Array.from(document.getElementsByClassName("lockToken"));
         tokens.forEach((token) => {
             token.innerText = "";
         });
     }
 
     async function disableBlind(){
-        let tokens = Array.from(document.getElementsByClassName("token"));
+        let tokens = Array.from(document.getElementsByClassName("blindToken"));
         tokens.forEach((token) => {
             token.style.backgroundColor = token.classList.contains("red") ? "red" : "yellow";
             token.innerText = "";
@@ -418,7 +423,7 @@ function crazyTokensMode(AI) {
     }
 
     async function disableGhost() {
-        let tokens = Array.from(document.getElementsByClassName("ghost"));
+        let tokens = Array.from(document.getElementsByClassName("ghostToken"));
         for (const token of tokens) {
             const columnId = token.parentElement.parentElement.id;
             const columnData = boardMap.get(columnId);
@@ -437,7 +442,7 @@ function crazyTokensMode(AI) {
     }
 
     async function disableDice() {
-        let tokens = Array.from(document.getElementsByClassName("token"));
+        let tokens = Array.from(document.getElementsByClassName("diceToken"));
         tokens.forEach((token) => {
             token.innerText = "";
         });
@@ -617,7 +622,13 @@ function crazyTokensMode(AI) {
         const token = document.createElement("div");
         token.className = `token ${player.color}`;
         if (player.specialToken === "👻")
-            token.classList.add("ghost", "opacity-50", "grayscale");
+            token.classList.add("ghostToken", "opacity-50", "grayscale");
+        if (player.specialToken === "🎲")
+            token.classList.add("diceToken")
+        if (player.specialToken === "🔒")
+            token.classList.add("lockToken")
+        if (player.specialToken === "🌫️")
+            token.classList.add("blindToken")
         token.innerText = `${player.specialToken}`;
         cell.className = "filled";
         cell.appendChild(token);
