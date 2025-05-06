@@ -36,12 +36,12 @@ function classicMode(activateAI) {
         for (let i = 1; i <= 7; i++) {
             boardMap.set(("c" + i.toString()), Array(6).fill(0));
             columnMap.set("c" + i.toString(), setArray(i.toString()));
-            console.log("Column: ", i, "Cells: ", columnMap.get("c" + i.toString()));
             columnList.push(document.getElementById("c" + i.toString()));
         }
     }
 
     function start() {
+        clearGame();
         init();
         enableClicks();
         columnList.forEach((column) => {
@@ -50,13 +50,19 @@ function classicMode(activateAI) {
     }
 
     function clearGame() {
-        boardMap.clear()
-        columnMap.clear()
-        columnList = []
-    }
-
-    function stop() {
-        clearGame()
+        columnList.forEach((column) => {
+            const newColumn = column.cloneNode(true);
+            column.replaceWith(newColumn);
+        });
+    
+        boardMap.clear();
+        columnMap.clear();
+        columnList = [];
+    
+        const winnerDiv = document.getElementById("winner");
+        const drawDiv = document.getElementById("draw");
+        if (winnerDiv) winnerDiv.remove();
+        if (drawDiv) drawDiv.remove();
     }
 
     /* Click Functionality */
@@ -76,12 +82,11 @@ function classicMode(activateAI) {
     /* Handle Column Click */
 
     async function handleColumnClick(column) {
-        if (player1.winner || player2.winner) { stop(); return; }
-
-        console.log("Column clicked: ", column.id, "\nPlayer: ", player1.turn ? player1.num : player2.num, "\nBoard: ", boardMap);
+        if (player1.winner || player2.winner) { clearGame(); return; }
+        
         await placeToken(column);
-        if (checkWin(false)) insertDivWinner(), stop();
-        else if (checkDraw()) insertDivDraw(), stop();
+        if (checkWin(false)) insertDivWinner(), disableClicks();
+        else if (checkDraw()) insertDivDraw(), disableClicks();
         else {
             if (player2.turn && player2.AI) {
                 disableClicks();
@@ -155,9 +160,13 @@ function classicMode(activateAI) {
         }
 
         const cells = columnMap.get(column.id);
+        if (!cells) {
+            console.error("Cells are undefined for column ID: ", column.id);
+            return;
+        }
         const columnData = boardMap.get(column.id);
-        if (!cells || !columnData) {
-            console.error("Cells or columnData is undefined for column ID: ", column.id, columnMap);
+        if (!columnData) {
+            console.error("ColumnData is undefined for column ID: ", column.id, boardMap);
             return;
         }    
 
@@ -323,7 +332,7 @@ function classicMode(activateAI) {
     }
 
     document.getElementById("btnMn").addEventListener("click", () => {
-        stop();
+        clearGame();
         returnToMenu();
     });
 

@@ -27,13 +27,13 @@ function returnToMenu(){
 		document.getElementById("menu").style.display = 'block';
 		document.getElementById("board").style.float = 'right';
 		document.getElementById("board").style.pointerEvents = 'none';
-
-		const buttom = document.getElementById("btnMn")
-		buttom.remove()
+		if (document.getElementById("btnMn"))
+			document.getElementById("btnMn").remove()
 	}
 	
 	resetDivs()
 	resetDisplay()
+	return ;
 }
 
 function enterTheGame(){
@@ -46,23 +46,27 @@ function enterTheGame(){
 		buttom.className = "bg-gradient-to-r from-teal-400 to-blue-500"
 		buttom.id = "btnMn"
 		buttom.innerText = "Return to menu"
+		buttom.addEventListener("click", returnToMenu);
 		document.getElementById("board").appendChild(buttom);
 	}
 	
 	document.getElementById("btnClassic").addEventListener("click", () => {
 		ocultarMenu();
 		classicMode(false);
+		return ;
 	});
 	
 	document.getElementById("btnClassicAI").addEventListener("click", () => {
 		ocultarMenu();
 		classicMode(true);
+		return ;
 	});
 	
 
 	document.getElementById("btnCrazyTkns").addEventListener("click", () => {
 		ocultarMenu();
 		crazyTokensMode(false);
+		return ;
 	});
 }
 

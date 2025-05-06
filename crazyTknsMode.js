@@ -49,6 +49,7 @@ function crazyTokensMode(AI) {
     }
 
     async function start() {
+        clearGame();
         init();
         insertDice();
         enableClicks();
@@ -59,13 +60,19 @@ function crazyTokensMode(AI) {
     }
 
     function clearGame() {
-        boardMap.clear()
-        columnMap.clear()
-        columnList = []
-    }
-
-    function stop() {
-        clearGame()
+        columnList.forEach((column) => {
+            const newColumn = column.cloneNode(true);
+            column.replaceWith(newColumn);
+        });
+    
+        boardMap.clear();
+        columnMap.clear();
+        columnList = [];
+    
+        const winnerDiv = document.getElementById("winner");
+        const drawDiv = document.getElementById("draw");
+        if (winnerDiv) winnerDiv.remove();
+        if (drawDiv) drawDiv.remove();
     }
 
     /* Click Functionality */
@@ -86,7 +93,7 @@ function crazyTokensMode(AI) {
     /* Handle Column Click */
 
     async function handleColumnClick(column) {
-        if (player1.winner || player2.winner) { stop(); return; }
+        if (player1.winner || player2.winner) { clearGame(); return; }
 
         const currentPlayer = player1.turn ? player1 : player2;
         if (currentPlayer.affected && currentPlayer.affected != "🎲" && currentPlayer.turnAffected > 0)
@@ -106,8 +113,8 @@ function crazyTokensMode(AI) {
         }
         else
             await placeToken(column);
-        if (checkWin(false)) insertDivWinner(), stop();
-        else if (checkDraw()) insertDivDraw(), stop();
+        if (checkWin(false)) insertDivWinner(), disableClicks();
+        else if (checkDraw()) insertDivDraw(), disableClicks();
         else {
             if (player2.turn && player2.AI) {
                 disableClicks();
@@ -666,7 +673,7 @@ function crazyTokensMode(AI) {
     }
 
     document.getElementById("btnMn").addEventListener("click", () => {
-        stop();
+        clearGame();
         returnToMenu();
     });
 
