@@ -18,8 +18,6 @@ function returnToMenu(){
 		let tokens = Array.from(document.getElementsByClassName("token"))
 		tokens.forEach(token => { token.remove()})
 		
-		if (document.getElementById("winner")) document.getElementById("winner").remove()
-		if (document.getElementById("draw")) document.getElementById("draw").remove()
 		if (document.getElementById("dice-container")) document.getElementById("dice-container").remove()
 	}
 
@@ -30,44 +28,51 @@ function returnToMenu(){
 		if (document.getElementById("btnMn"))
 			document.getElementById("btnMn").remove()
 	}
-	
+	localStorage.removeItem('gameState');
 	resetDivs()
 	resetDisplay()
 	return ;
 }
 
-function enterTheGame(){
-	function ocultarMenu() {
-		document.getElementById("menu").style.display = 'none';
-		document.getElementById("board").style.float = 'none';
-		document.getElementById("board").style.pointerEvents = 'auto';
+function enterTheGame() {
+    function ocultarMenu() {
+        document.getElementById("menu").style.display = 'none';
+        document.getElementById("board").style.float = 'none';
+        document.getElementById("board").style.pointerEvents = 'auto';
 
-		const buttom = document.createElement("button")
-		buttom.className = "bg-gradient-to-r from-teal-400 to-blue-500"
-		buttom.id = "btnMn"
-		buttom.innerText = "Return to menu"
-		buttom.addEventListener("click", returnToMenu);
-		document.getElementById("board").appendChild(buttom);
-	}
-	
-	document.getElementById("btnClassic").addEventListener("click", () => {
-		ocultarMenu();
-		classicMode(false);
-		return ;
-	});
-	
-	document.getElementById("btnClassicAI").addEventListener("click", () => {
-		ocultarMenu();
-		classicMode(true);
-		return ;
-	});
-	
+        const button = document.createElement("button");
+        button.className = "bg-gradient-to-r from-teal-400 to-blue-500";
+        button.id = "btnMn";
+        button.innerText = "Return to menu";
+        button.addEventListener("click", returnToMenu);
+        document.getElementById("board").appendChild(button);
+    }
 
-	document.getElementById("btnCrazyTkns").addEventListener("click", () => {
-		ocultarMenu();
-		crazyTokensMode(false);
-		return ;
-	});
+    function initGame(modo, activarAI) {
+        ocultarMenu();
+
+        switch (modo) {
+            case "classic":
+                classicMode(activarAI);
+                break;
+            case "crazy":
+                crazyTokensMode(activarAI);
+                break;
+        }
+        
+    }
+
+    document.getElementById("btnClassic").addEventListener("click", () => {
+        initGame("classic", false);
+    });
+
+    document.getElementById("btnClassicAI").addEventListener("click", () => {
+        initGame("classic", true);
+    });
+
+    document.getElementById("btnCrazyTkns").addEventListener("click", () => {
+        initGame("crazy", false);
+    });
 }
 
 enterTheGame();

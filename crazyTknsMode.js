@@ -71,8 +71,11 @@ function crazyTokensMode(AI) {
     
         const winnerDiv = document.getElementById("winner");
         const drawDiv = document.getElementById("draw");
-        if (winnerDiv) winnerDiv.remove();
-        if (drawDiv) drawDiv.remove();
+        if (winnerDiv){
+            winnerDiv.style.display = "none";
+            winnerDiv.classList.remove = (`${player1.winner ? `${player1.color}` : `${player2.color}`}`);
+        }
+        if (drawDiv) drawDiv.style.display = "none";
     }
 
     /* Click Functionality */
@@ -138,25 +141,22 @@ function crazyTokensMode(AI) {
     }
 
     function insertDivWinner() {
-        const winner = document.createElement("div");
+        const winner = document.getElementById("winner");
         const playerWinner = player1.winner ? `${player1.color}` : `${player2.color}`;
         const player = player1.winner ? "Player 1" : "Player 2";
-
-        winner.className = `${playerWinner} bg-gradient-to-r from-teal-400 to-blue-500`;
-        winner.id = `winner`
+        winner.classList.add(playerWinner);
+        winner.style.display = "block";
         winner.innerHTML = `¡El <span>${player}</span> ha ganado!`;
-        document.getElementById("board").appendChild(winner);
+    
         document.getElementById("dice-container").style.pointerEvents = 'none';
         disableClicks();
     }
 
     function insertDivDraw() {
-        const draw = document.createElement("div");
+        const draw = document.getElementById("draw");
 
-        draw.className = `bg-gradient-to-r from-red-400 to-yellow-500`;
-        draw.id = `draw`
         draw.innerText = `¡Empate!`;
-        document.getElementById("board").appendChild(draw);
+        draw.style.display = "block";
         document.getElementById("dice-container").style.pointerEvents = 'none';
         disableClicks();
     }

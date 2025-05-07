@@ -2003,6 +2003,7 @@ h1 {
 }
 #winner {
   position: absolute;
+  display: none;
   border: 2px solid rgb(7, 39, 76);
   opacity: 80%;
   border-radius: 1%;
@@ -2028,6 +2029,7 @@ h1 {
 }
 #draw {
   position: absolute;
+  display: none;
   border: 2px solid rgb(7, 39, 76);
   opacity: 80%;
   border-radius: 1%;
