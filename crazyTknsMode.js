@@ -234,7 +234,7 @@ function crazyTokensMode(AI) {
         const currentPlayer = player1.turn ? player1 : player2;
         columnData[row] = currentPlayer.num;
 
-        updateCell(cells[row], currentPlayer);
+        await updateCell(cells[row], currentPlayer);
         await updateTurnIndicator();
         await delay(1000);
         enableClicks();
@@ -305,33 +305,101 @@ function crazyTokensMode(AI) {
     /* AI Functionality */
 
     async function aiToken() {
-        let bestScore = -Infinity;
-        let bestColumn = null;
+        const winColumns = detectWinOpportunities(player2);
+        if (winColumns.length > 0) {
+            await winColumns[0].click();
+            return;
+        }
+    
+        const	threatColumns = detectWinOpportunities(player1);
+        let     columnToUse = await controlUseDice(threatColumns);
 
+		if (!columnToUse){
+			if (threatColumns.length > 0) {
+				await threatColumns[0].click();
+            	return;
+			}
+			columnToUse =
+            	Math.random () < 0.2 ? columnList[Math.floor(Math.random() * columnList.length)] : doAlgorithm();
+		}
+
+        if (columnToUse && !isColumnPlayable(columnToUse))
+            columnToUse = columnList.find(column => isColumnPlayable(column));
+
+        if (columnToUse) columnToUse.click()
+    }
+
+    function isColumnPlayable(column) {
+        if (!column || !column.id) return false;
+        
+        if (column.classList.contains("opacity-50")) return false;
+        
+        const columnData = boardMap.get(column.id);
+        const hasEmptyCell = columnData.some(cell => cell === 0);
+        
+        return hasEmptyCell;
+    }
+
+    function detectWinOpportunities(player) {
+        const winColumns = [];
+    
         columnList.forEach((column) => {
+            if (!isColumnPlayable(column)) return;
+
             const columnData = boardMap.get(column.id);
             const row = columnData.findIndex(cell => cell === 0);
             if (row === -1) return;
-
-            columnData[row] = player2.num;
-            const score = minmax(6, false, -Infinity, Infinity);
+    
+            columnData[row] = player.num;
+            const wouldWin = checkWin(true);
             columnData[row] = 0;
-
-            if (score > bestScore) {
-                bestScore = score;
-                bestColumn = column;
-            }
+    
+            if (wouldWin) winColumns.push(column);
         });
-        if (bestColumn) handleColumnClick(bestColumn)
+    
+        return winColumns;
     }
 
+   	function doAlgorithm() {
+		let bestScore = -Infinity;
+		let bestColumn = null;
+	
+		columnList.forEach((column) => {
+            if (!isColumnPlayable(column)) return;
+
+			const columnData = boardMap.get(column.id);
+			const row = columnData.findIndex(cell => cell === 0);
+			if (row === -1) return;
+			
+			const potential = evaluateColumnPotential(column.id, player2.num);
+			
+			if (potential === 0 && columnData.some(cell => cell === player1.num)) {
+				return;
+			}
+	
+			columnData[row] = player2.num;
+			const score = minmax(5, false, -Infinity, Infinity) + potential;
+			columnData[row] = 0;
+	
+			if (score > bestScore) {
+				bestScore = score;
+				bestColumn = column;
+			}
+		});
+		 if (!bestColumn) 
+            bestColumn = columnList.find(column => isColumnPlayable(column));
+
+		return bestColumn;
+	}
+
     function minmax(depth, isMax, alpha, beta) {
-        if (checkWin(true)) return isMax ? -1 : 1;
         if (checkDraw()) return 0;
         if (depth === 0) return evaluateBoard();
 
         if (isMax) {
             columnList.forEach((column) => {
+                if (!isColumnPlayable(column)) return;
+
                 const columnData = boardMap.get(column.id);
                 const row = columnData.findIndex(cell => cell === 0);
                 if (row === -1) return;
@@ -347,6 +415,8 @@ function crazyTokensMode(AI) {
         }
         else {
             columnList.forEach((column) => {
+                if (!isColumnPlayable(column)) return;
+                
                 const columnData = boardMap.get(column.id);
                 const row = columnData.findIndex(cell => cell === 0);
                 if (row === -1) return;
@@ -363,18 +433,208 @@ function crazyTokensMode(AI) {
     }
 
     function evaluateBoard() {
-        let score = 0;
+		let score = 0;
+		
+		score += evaluateLines(1, 0);
+		score += evaluateLines(0, 1);
+		score += evaluateLines(1, 1);
+		score += evaluateLines(1, -1);
+		
+		return score;
+	}
 
-        columnList.forEach((column) => {
-            const columnData = boardMap.get(column.id);
+	function evaluateLines(deltaX, deltaY) {
+		let score = 0;
+		for (let startCol = 0; startCol < columnList.length - 3 * Math.abs(deltaX); startCol++) {
+			for (let startRow = 0; startRow < 6 - 3 * Math.abs(deltaY); startRow++) {
+				if (deltaY === -1 && startRow < 3) continue;
+				let windowScore = evaluateWindow(startCol, startRow, deltaX, deltaY);
+				score += windowScore;
+			}
+		}
+		return score;
+	}
 
-            columnData.forEach((cell) => {
-                if (cell === player2.num) score += 1;
-                else if (cell === player1.num) score -= 1;
-            });
-        });
-        return score;
+	function evaluateWindow(col, row, deltaX, deltaY) {
+		const window = [];
+		
+		for (let i = 0; i < 4; i++) {
+			const currentCol = col + i * deltaX;
+			const currentRow = row + i * deltaY;
+			
+			if (currentCol >= 0 && currentCol < columnList.length && 
+				currentRow >= 0 && currentRow < 6) {
+				const cellValue = boardMap.get(columnList[currentCol].id)[currentRow];
+				window.push(cellValue);
+			}
+		}
+		if (window.length !== 4) return 0;
+		
+		const ai = window.filter(cell => cell === player2.num).length;
+		const human = window.filter(cell => cell === player1.num).length;
+		const empty = window.filter(cell => cell === 0).length;
+		
+		if (ai === 4) return 100;
+		if (human === 4) return -100;
+		if (ai === 3 && empty === 1) return 10;
+		if (human === 3 && empty === 1) return -10;
+		if (ai === 2 && empty === 2) return 2;
+		if (human === 2 && empty === 2) return -2;
+		
+		return 0;
+	}
+
+	function evaluateColumnPotential(columnId, playerNum) {
+		let potential = 0;
+		const columnData = boardMap.get(columnId);
+		let verticalCount = 0;
+
+		for (let i = 0; i < columnData.length; i++) {
+			if (columnData[i] === playerNum) verticalCount++;
+			else if (columnData[i] === 0) continue;
+			else verticalCount = 0;
+		}
+		
+		if (verticalCount >= 4) potential += 100;
+		
+		for (let row = 0; row < columnData.length; row++) {
+			if (columnData[row] === 0 || columnData[row] === playerNum) {
+				potential += checkLinePotential(
+					parseInt(columnId.substring(1)) - 1, row, playerNum
+				);
+			}
+		}
+		return potential;
+	}
+	
+	function checkLinePotential(col, row, playerNum) {
+		let potential = 0;
+		const directions = [
+			{x: 1, y: 0},
+			{x: 1, y: 1},
+			{x: 1, y: -1}
+		];
+		
+		for (const {x, y} of directions) {
+			let space = 0;
+			let count = 0;
+			
+			for (let i = -3; i <= 3; i++) {
+				const newCol = col + i * x;
+				const newRow = row + i * y;
+				
+				if (newCol >= 0 && newCol < 7 && newRow >= 0 && newRow < 6) {
+					const value = boardMap.get(`c${newCol + 1}`)[newRow];
+					if (value === 0) space++;
+					else if (value === playerNum) count++;
+					else {
+						space = 0;
+						count = 0;
+					}
+				}
+			}
+			if (space + count >= 4) potential += count * 2;
+		}
+		return potential;
+	}
+
+	/* Special Tokens AI Functionality */
+	
+	function countTokens(playerNum) {
+		let count = 0;
+
+		columnList.forEach((column) => {
+			const columnData = boardMap.get(column.id);
+			count += columnData.filter(v => v === playerNum).length;
+		});
+		return count;
+	}
+
+    function shouldUseSpecialToken(token, blockNeeded, boardFilledRatio) {
+        const	playerTokens = countTokens(player2.num);
+    	const	opponentTokens = countTokens(player1.num);
+
+		switch (token) {
+            case "💣":
+                return boardFilledRatio >= 0.5;
+            case "🔒":
+                return blockNeeded;
+            case "👻":
+                return boardFilledRatio >= 0.5;
+            case "🌫️":
+            	return blockNeeded || opponentTokens > playerTokens + 4;
+			case "🌀":
+            	return opponentTokens > playerTokens && boardFilledRatio > 0.35;
+            case "🎲":
+                return blockNeeded || opponentTokens > playerTokens + 4;;
+            default:
+                return false;
+        }
     }
+
+	function chooseBestColumn(token){
+		let bestCol = null;
+		let maxEnemyTokens = 0;
+
+		if (token === "👻") {
+			bestCol = columnList[Math.floor(columnList.length / 2)];
+			if (isColumnPlayable(bestCol)) return bestCol;
+			bestCol = null;
+		}
+
+		columnList.forEach((column) => {
+			if (!isColumnPlayable(column)) return ;
+
+			const columnData = boardMap.get(column.id);
+			const enemyCount = columnData.filter(v => v === player1.num).length;
+			if (enemyCount > maxEnemyTokens) {
+				maxEnemyTokens = enemyCount;
+				bestCol = column;
+			}
+		});
+		return bestCol;
+	}
+
+    function chooseBestColumnForToken(token, threats) {
+        switch (token) {
+            case "🔒":
+                return threats.length > 0 ? threats[0] : null;
+            case "💣": 
+                return chooseBestColumn("💣");
+            case "👻":
+				return chooseBestColumn("👻");
+            default:
+                return null;
+        }
+    }
+
+    async function controlUseDice(threatColumns) {
+		let		columnToUse = null;
+		const	dice = document.getElementById("dice-container");
+		const	blockNeeded = threatColumns.length > 0;
+        const	needSpecialToken = blockNeeded || Math.random() < 0.5;
+
+        if (!player2.specialToken && player2.diceUses > 0 && needSpecialToken) {
+            await dice.click();
+            await delay(500);
+        }
+
+        const   totalCells = columnList.length * 6;
+        const	filledCells = Array.from(document.getElementsByClassName("filled")).length;
+        const   boardFilledRatio = filledCells / totalCells;
+		const  shouldUseSpecial = player2.specialToken ? 
+			shouldUseSpecialToken(player2.specialToken, blockNeeded, boardFilledRatio) : false;
+
+		if (shouldUseSpecial) {
+			await dice.click();
+			const specialColumn = chooseBestColumnForToken(player2.specialToken, threatColumns);
+			if (specialColumn) 
+				columnToUse = Math.random () < 0.2 ? 
+					columnList[Math.floor(Math.random() * columnList.length)] : specialColumn;
+			player2.useSpecial = true;
+		}
+		return columnToUse;
+	}
 
     /* Special Tokens Functionality */
 
@@ -422,7 +682,8 @@ function crazyTokensMode(AI) {
     }
 
     async function disableBlind(){
-        let tokens = Array.from(document.getElementsByClassName("blindToken"));
+        console.log("disableBlind")
+        let tokens = Array.from(document.getElementsByClassName("token"));
         tokens.forEach((token) => {
             token.style.backgroundColor = token.classList.contains("red") ? "red" : "yellow";
             token.innerText = "";
@@ -627,6 +888,7 @@ function crazyTokensMode(AI) {
 
     async function updateSpecialCell(cell, player) {
         const token = document.createElement("div");
+
         token.className = `token ${player.color}`;
         if (player.specialToken === "👻")
             token.classList.add("ghostToken", "opacity-50", "grayscale");

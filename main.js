@@ -55,7 +55,7 @@ function enterTheGame() {
             case "classic":
                 classicMode(activarAI);
                 break;
-            case "crazy":
+            case "custom":
                 crazyTokensMode(activarAI);
                 break;
         }
@@ -71,7 +71,11 @@ function enterTheGame() {
     });
 
     document.getElementById("btnCrazyTkns").addEventListener("click", () => {
-        initGame("crazy", false);
+        initGame("custom", false);
+    });
+
+    document.getElementById("btnCrazyTknsAI").addEventListener("click", () => {
+        initGame("custom", true);
     });
 }
 
