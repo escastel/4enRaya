@@ -163,7 +163,7 @@ function crazyTokensMode(AI) {
 
     /* Turn Indicator */
 
-    function updateDice() {
+    async function updateDice() {
         const currentPlayer = player1.turn ? player1 : player2;
 
         const diceContainer = document.getElementById("dice-container");
@@ -178,6 +178,7 @@ function crazyTokensMode(AI) {
             diceIcon.innerText = `❌`;
         else
             diceIcon.innerText = `⚪`
+		await delay(300);
         
     }
 
@@ -197,7 +198,7 @@ function crazyTokensMode(AI) {
                 }
             });
         });
-        updateDice();
+        await updateDice();
         console.log(`Turn: ${currentPlayer.num}, color: ${currentPlayer.color}`);
     }
       
@@ -305,6 +306,12 @@ function crazyTokensMode(AI) {
     /* AI Functionality */
 
     async function aiToken() {
+		if (player2.affected && player2.affected === "🌫️"){
+			console.log("AI is blind");
+			await columnList[Math.floor(Math.random() * columnList.length)].click();
+			return ;
+		}
+
         const winColumns = detectWinOpportunities(player2);
         if (winColumns.length > 0) {
             await winColumns[0].click();
@@ -326,7 +333,7 @@ function crazyTokensMode(AI) {
         if (columnToUse && !isColumnPlayable(columnToUse))
             columnToUse = columnList.find(column => isColumnPlayable(column));
 
-        if (columnToUse) columnToUse.click()
+        if (columnToUse) await columnToUse.click()
     }
 
     function isColumnPlayable(column) {
@@ -539,7 +546,7 @@ function crazyTokensMode(AI) {
 	}
 
 	/* Special Tokens AI Functionality */
-	
+
 	function countTokens(playerNum) {
 		let count = 0;
 
@@ -615,7 +622,7 @@ function crazyTokensMode(AI) {
         const	needSpecialToken = blockNeeded || Math.random() < 0.5;
 
         if (!player2.specialToken && player2.diceUses > 0 && needSpecialToken) {
-            await dice.click();
+            await rollDice();
             await delay(500);
         }
 
@@ -626,7 +633,8 @@ function crazyTokensMode(AI) {
 			shouldUseSpecialToken(player2.specialToken, blockNeeded, boardFilledRatio) : false;
 
 		if (shouldUseSpecial) {
-			await dice.click();
+			await rollDice();
+			delay(500);
 			const specialColumn = chooseBestColumnForToken(player2.specialToken, threatColumns);
 			if (specialColumn) 
 				columnToUse = Math.random () < 0.2 ? 
