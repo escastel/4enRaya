@@ -1,3 +1,6 @@
+import { classicMode } from './classicMode.js';
+import { crazyTokensMode } from './crazyTknsMode.js';
+
 function returnToMenu(){
 	function resetDivs(){
 		let columns = Array.from(document.getElementsByClassName("column"))
@@ -34,8 +37,10 @@ function returnToMenu(){
 	return ;
 }
 
+window.returnToMenu = returnToMenu;
+
 function enterTheGame() {
-    function ocultarMenu() {
+    function hideMenu() {
         document.getElementById("menu").style.display = 'none';
         document.getElementById("board").style.float = 'none';
         document.getElementById("board").style.pointerEvents = 'auto';
@@ -49,7 +54,7 @@ function enterTheGame() {
     }
 
     function initGame(modo, activarAI) {
-        ocultarMenu();
+        hideMenu();
 
         switch (modo) {
             case "classic":
@@ -79,4 +84,4 @@ function enterTheGame() {
     });
 }
 
-enterTheGame();
+document.addEventListener('DOMContentLoaded', enterTheGame);
