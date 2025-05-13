@@ -97,7 +97,7 @@ export function classicMode(activateAI) {
     /* Place Token Functionality */
 
     async function placeToken(column) {
-        placeTokenEngine(column, player1, player2, columnMap, boardMap, columnList);
+        await placeTokenEngine(column, player1, player2, columnMap, boardMap, columnList, "classic");
     }
 
     /* Check Win / Draw */

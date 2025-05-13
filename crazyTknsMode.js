@@ -58,7 +58,7 @@ export function crazyTokensMode(AI) {
         enableClicks();
         await document.getElementById("dice-container").addEventListener("click", () => rollDice());
         columnList.forEach((column) => {
-            column.addEventListener("click", () => handleColumnClick(column));
+            column.addEventListener("click", async () => handleColumnClick(column));
         });
     }
 
@@ -136,34 +136,14 @@ export function crazyTokensMode(AI) {
 
     /* Turn Indicator */
 
-    async function updateDice() {
-        const currentPlayer = player1.turn ? player1 : player2;
-
-        const diceContainer = document.getElementById("dice-container");
-        diceContainer.style.backgroundColor = `${currentPlayer.color === "red" ? 
-            `rgba(255, 2, 2, 0.811)` : `rgba(255, 237, 35, 0.874)`}`;
-        diceContainer.style.transition = `background-color 0.5s ease-in-out`;
-        
-        const diceIcon = document.getElementById("dice-icon");
-        if (currentPlayer.specialToken != null)
-            diceIcon.innerText = `${currentPlayer.specialToken}`
-        else if (!currentPlayer.specialToken && currentPlayer.diceUses == 0)
-            diceIcon.innerText = `❌`;
-        else
-            diceIcon.innerText = `⚪`
-		await delay(300);
-        
-    }
-
     async function updateTurnIndicator() {
-        await updateDice();
-        return updateTurnIndicatorEngine(player1, player2, columnList, columnMap);
+        await updateTurnIndicatorEngine(player1, player2, columnList, columnMap, "crazy");
     }
       
     /* Place Token Functionality */
 
     async function placeToken(column) {
-        placeTokenEngine(column, player1, player2, columnMap, boardMap, columnList);
+        await placeTokenEngine(column, player1, player2, columnMap, boardMap, columnList, "crazy");
     }
 
     /* Check Win / Draw */
@@ -613,8 +593,8 @@ export function crazyTokensMode(AI) {
 
     /* Utils */
 
-    function delay(ms) {
-        return delayEngine(ms);
+    async function delay(ms) {
+        await delayEngine(ms);
     }
 
     document.getElementById("btnMn").addEventListener("click", () => {

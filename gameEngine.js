@@ -66,7 +66,25 @@ export function insertDivDraw(columnList) {
 	disableClicks(columnList);
 }
 
-export async function updateTurnIndicator(player1, player2, columnList, columnMap) {
+async function updateDice(player1, player2) {
+        const currentPlayer = player1.turn ? player1 : player2;
+
+        const diceContainer = document.getElementById("dice-container");
+        diceContainer.style.backgroundColor = `${currentPlayer.color === "red" ? 
+            `rgba(255, 2, 2, 0.811)` : `rgba(255, 237, 35, 0.874)`}`;
+        diceContainer.style.transition = `background-color 0.5s ease-in-out`;
+        
+        const diceIcon = document.getElementById("dice-icon");
+        if (currentPlayer.specialToken != null)
+            diceIcon.innerText = `${currentPlayer.specialToken}`
+        else if (!currentPlayer.specialToken && currentPlayer.diceUses == 0)
+            diceIcon.innerText = `❌`;
+        else
+            diceIcon.innerText = `⚪`
+		await delay(300);
+}  
+
+export async function updateTurnIndicator(player1, player2, columnList, columnMap, mode) {
         player1.turn = !player1.turn;
         player2.turn = !player2.turn;
 
@@ -82,11 +100,13 @@ export async function updateTurnIndicator(player1, player2, columnList, columnMa
                 }
             });
         });
+        if (mode == "crazy") 
+            await updateDice(player1, player2);
         console.log(`Turn: ${currentPlayer.num}, color: ${currentPlayer.color}`);
 }
 
 
-export async function updateCell(cell, player) {
+async function updateCell(cell, player) {
         const token = document.createElement("div");
 
         token.className = `token ${player.color}`;
@@ -94,7 +114,7 @@ export async function updateCell(cell, player) {
         cell.appendChild(token);
 }
 
-export async function placeToken(column, player1, player2, columnMap, boardMap, columnList) {
+export async function placeToken(column, player1, player2, columnMap, boardMap, columnList, mode) {
     disableClicks(columnList);
     if (!column || !column.id) {
         console.error("Column or column ID is invalid: ", column);
@@ -122,7 +142,7 @@ export async function placeToken(column, player1, player2, columnMap, boardMap, 
     columnData[row] = currentPlayer.num;
 
     await updateCell(cells[row], currentPlayer);
-    await updateTurnIndicator(player1, player2, columnList, columnMap);
+    await updateTurnIndicator(player1, player2, columnList, columnMap, mode);
     await delay(1000);
     enableClicks(columnList);
 }
@@ -166,7 +186,7 @@ export function checkWin(boardMap, columnList, player1, player2, checking) {
 	return false;
 }
 
-export function checkDirection(col, row, player, directions, columnList, boardMap) {
+function checkDirection(col, row, player, directions, columnList, boardMap) {
 	for (const { x, y } of directions) {
 		let count = 1;
 
@@ -254,7 +274,7 @@ export function doAlgorithm(boardMap, columnList, player1, player2) {
 	return bestColumn;
 }
 
-export function minmax(depth, isMax, alpha, beta, boardMap, columnList, player1, player2) {
+function minmax(depth, isMax, alpha, beta, boardMap, columnList, player1, player2) {
     if (checkDraw(boardMap, columnList)) return 0;
     if (depth === 0) return evaluateBoard(boardMap, columnList, player2.num, player1.num);
 
@@ -294,7 +314,7 @@ export function minmax(depth, isMax, alpha, beta, boardMap, columnList, player1,
     }
 }
 
-export function evaluateBoard(boardMap, columnList, aiNum, humanNum) {
+function evaluateBoard(boardMap, columnList, aiNum, humanNum) {
     let score = 0;
     
     score += evaluateLines(boardMap, columnList, aiNum, humanNum, 1, 0);
@@ -305,20 +325,21 @@ export function evaluateBoard(boardMap, columnList, aiNum, humanNum) {
     return score;
 }
 
-export function evaluateLines(boardMap, columnList, aiNum, humanNum, deltaX, deltaY) {
+function evaluateLines(boardMap, columnList, aiNum, humanNum, deltaX, deltaY) {
     let score = 0;
+
     for (let startCol = 0; startCol < columnList.length - 3 * Math.abs(deltaX); startCol++) {
         for (let startRow = 0; startRow < 6 - 3 * Math.abs(deltaY); startRow++) {
             if (deltaY === -1 && startRow < 3) continue;
-            let windowScore = evaluateWindow(boardMap, columnList, aiNum, humanNum, startCol, startRow, deltaX, deltaY);
-            score += windowScore;
+            let mapScore = evaluateMap(boardMap, columnList, aiNum, humanNum, startCol, startRow, deltaX, deltaY);
+            score += mapScore;
         }
     }
     return score;
 }
 
-export function evaluateWindow(boardMap, columnList, aiNum, humanNum, col, row, deltaX, deltaY) {
-    const window = [];
+function evaluateMap(boardMap, columnList, aiNum, humanNum, col, row, deltaX, deltaY) {
+    const map = [];
     
     for (let i = 0; i < 4; i++) {
         const currentCol = col + i * deltaX;
@@ -327,14 +348,14 @@ export function evaluateWindow(boardMap, columnList, aiNum, humanNum, col, row, 
         if (currentCol >= 0 && currentCol < columnList.length && 
             currentRow >= 0 && currentRow < 6) {
             const cellValue = boardMap.get(columnList[currentCol].id)[currentRow];
-            window.push(cellValue);
+            map.push(cellValue);
         }
     }
-    if (window.length !== 4) return 0;
+    if (map.length !== 4) return 0;
     
-    const ai = window.filter(cell => cell === aiNum).length;
-    const human = window.filter(cell => cell === humanNum).length;
-    const empty = window.filter(cell => cell === 0).length;
+    const ai = map.filter(cell => cell === aiNum).length;
+    const human = map.filter(cell => cell === humanNum).length;
+    const empty = map.filter(cell => cell === 0).length;
     
     if (ai === 4) return 100;
     if (human === 4) return -100;
@@ -346,7 +367,7 @@ export function evaluateWindow(boardMap, columnList, aiNum, humanNum, col, row, 
     return 0;
 }
 
-export function evaluateColumnPotential(boardMap, columnId, playerNum) {
+function evaluateColumnPotential(boardMap, columnId, playerNum) {
     let potential = 0;
     const columnData = boardMap.get(columnId);
     let verticalCount = 0;
@@ -367,8 +388,9 @@ export function evaluateColumnPotential(boardMap, columnId, playerNum) {
     return potential;
 }
 
-export function checkLinePotential(boardMap, col, row, playerNum) {
+function checkLinePotential(boardMap, col, row, playerNum) {
     let potential = 0;
+
     const directions = [
         {x: 1, y: 0},
         {x: 1, y: 1},
