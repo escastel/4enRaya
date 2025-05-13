@@ -222,7 +222,7 @@ export function crazyTokensMode(activateAI: boolean): void {
 
 	/* Special Tokens AI Functionality */
 
-	function countTokens(playerNum) {
+	function countTokens(playerNum): number {
 		let count = 0;
 
 		columnList.forEach((column) => {
@@ -234,7 +234,7 @@ export function crazyTokensMode(activateAI: boolean): void {
 		return count;
 	}
 
-    function shouldUseSpecialToken(token, blockNeeded, boardFilledRatio) {
+    function shouldUseSpecialToken(token, blockNeeded, boardFilledRatio): boolean {
         const	playerTokens = countTokens(player2.num);
     	const	opponentTokens = countTokens(player1.num);
 
@@ -256,7 +256,7 @@ export function crazyTokensMode(activateAI: boolean): void {
         }
     }
 
-	function chooseBestColumn(token){
+	function chooseBestColumn(token): HTMLElement | null {
 		let bestCol;
 		let maxEnemyTokens = 0;
 
@@ -280,7 +280,7 @@ export function crazyTokensMode(activateAI: boolean): void {
 		return bestCol;
 	}
 
-    function chooseBestColumnForToken(token, threats) {
+    function chooseBestColumnForToken(token, threats): HTMLElement | null {
         switch (token) {
             case "🔒":
                 return threats.length > 0 ? threats[0] : null;
@@ -293,8 +293,8 @@ export function crazyTokensMode(activateAI: boolean): void {
         }
     }
 
-    async function controlUseDice(threatColumns) {
-		let		columnToUse = null;
+    async function controlUseDice(threatColumns): Promise<HTMLElement | null> {
+		let		columnToUse: Promise<HTMLElement | null> = Promise.resolve(null);
 		const	blockNeeded = threatColumns.length > 0;
         const	needSpecialToken = blockNeeded || Math.random() < 0.5;
 
@@ -314,8 +314,8 @@ export function crazyTokensMode(activateAI: boolean): void {
 			delay(500);
 			const specialColumn = chooseBestColumnForToken(player2.specialToken, threatColumns);
 			if (specialColumn) 
-				columnToUse = Math.random () < 0.2 ? 
-					columnList[Math.floor(Math.random() * columnList.length)] : specialColumn;
+				columnToUse = Promise.resolve(Math.random () < 0.2 ? 
+					columnList[Math.floor(Math.random() * columnList.length)] : specialColumn);
 			player2.useSpecial = true;
 		}
 		return columnToUse;
@@ -323,7 +323,7 @@ export function crazyTokensMode(activateAI: boolean): void {
 
     /* Special Tokens Functionality */
 
-    async function rollDice() {
+    async function rollDice(): Promise<void> {
         const currentPlayer = player1.turn ? player1 : player2;
         
         const diceContainer = document.getElementById("dice-container");
@@ -358,7 +358,7 @@ export function crazyTokensMode(activateAI: boolean): void {
 
     /* Disable Effects */
 
-    async function disableLock(){
+    async function disableLock(): Promise<void> {
         columnList.forEach((column) => {
             column.classList.remove("opacity-50");
             column.style.pointerEvents = "auto";
@@ -370,7 +370,7 @@ export function crazyTokensMode(activateAI: boolean): void {
         });
     }
 
-    async function disableBlind(){
+    async function disableBlind(): Promise<void> {
         let tokens = Array.from(document.getElementsByClassName("token"));
         
         tokens.forEach((token) => {
@@ -379,7 +379,7 @@ export function crazyTokensMode(activateAI: boolean): void {
         });
     }
 
-    async function disableGhost() {
+    async function disableGhost(): Promise<void> {
         let tokens = Array.from(document.getElementsByClassName("ghostToken"));
         
         for (const token of tokens) {
@@ -405,14 +405,14 @@ export function crazyTokensMode(activateAI: boolean): void {
         }
     }
 
-    async function disableDice() {
+    async function disableDice(): Promise<void> {
         let tokens = Array.from(document.getElementsByClassName("diceToken"));
         tokens.forEach((token) => {
             (token as HTMLElement).innerText = "";
         });
     }
 
-    async function disableEffects(currentPlayer){
+    async function disableEffects(currentPlayer): Promise<void> {
         switch (currentPlayer.affected) {
             case "🔒":
                 await disableLock();
@@ -466,7 +466,7 @@ export function crazyTokensMode(activateAI: boolean): void {
         await delay(250);
     }
 
-    function handleReverse(){
+    function handleReverse(): void{
         for (let col = 0; col < columnList.length; col++) {
             const columnId = columnList[col].id;
             const columnData = boardMap.get(columnId);
@@ -497,7 +497,7 @@ export function crazyTokensMode(activateAI: boolean): void {
         player2.num === 2 ? player2.num = 1 : player2.num = 2;
     }
 
-    async function handleBlind(player) {
+    async function handleBlind(player): Promise<void> {
         const opponent = player === player1 ? player2 : player1;
         opponent.affected = player === player1 ? player1.specialToken : player2.specialToken;
         opponent.turnAffected = 1;
@@ -540,7 +540,7 @@ export function crazyTokensMode(activateAI: boolean): void {
         await delay(300);
     }
 
-    async function handleLock(column, player) {
+    async function handleLock(column, player): Promise<void> {
         const opponent = player === player1 ? player2 : player1;
         opponent.affected = player === player1 ? player1.specialToken : player2.specialToken;
         opponent.turnAffected = 1;
@@ -550,7 +550,7 @@ export function crazyTokensMode(activateAI: boolean): void {
     } 
 
 	
-    async function handleGhost() {
+    async function handleGhost(): Promise<void> {
         const opponent = player1.turn ? player2 : player1;
         const currentPlayer = player1.turn ? player1 : player2;
 
@@ -560,13 +560,13 @@ export function crazyTokensMode(activateAI: boolean): void {
         opponent.turnAffected = 1;
     } 
 
-	async function handleDice(){
+	async function handleDice(): Promise<void> {
 		const opponent = player1.turn ? player2 : player1;
         opponent.affected = player1.turn ? player1.specialToken : player2.specialToken;
         opponent.turnAffected = 1;
 	}
 
-    async function handleSpecialToken(row, player, column) {
+    async function handleSpecialToken(row, player, column): Promise<void> {
         switch (player.specialToken) {
             case "🌀":
                 await handleReverse();
@@ -594,7 +594,7 @@ export function crazyTokensMode(activateAI: boolean): void {
 
     /* Place Special Token */
 
-    async function updateSpecialCell(cell, player) {
+    async function updateSpecialCell(cell, player): Promise<void> {
         const token = document.createElement("div");
 
         token.className = `token ${player.color}`;
@@ -613,7 +613,7 @@ export function crazyTokensMode(activateAI: boolean): void {
         await delay(1000);
     }
 
-    async function placeSpecialToken(column) {
+    async function placeSpecialToken(column): Promise<void> {
         disableClicks();
 
         const currentPlayer = player1.turn ? player1 : player2;
