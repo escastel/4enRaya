@@ -52,17 +52,17 @@ export function classicMode(activateAI) {
     }
 
     function clearGame() {
-        return clearGameEngine(player1, player2, columnList, columnMap, boardMap);
+        clearGameEngine(player1, player2, columnList, columnMap, boardMap);
     }
 
     /* Click Functionality */
 
     function enableClicks() {
-        return enableClicksEngine(columnList);
+        enableClicksEngine(columnList);
     }
 
     function disableClicks() {
-       return disableClicksEngine(columnList);
+       disableClicksEngine(columnList);
     }
 
     /* Handle Column Click */
@@ -87,11 +87,11 @@ export function classicMode(activateAI) {
     /* Insert Div Win / Draw */
 
     function insertDivWinner() {
-        return insertDivWinnerEngine(player1, player2, columnList);
+        insertDivWinnerEngine(player1, player2, columnList);
     }
 
     function insertDivDraw() {
-        return insertDivDrawEngine(columnList);
+        insertDivDrawEngine(columnList);
     }
 
     /* Place Token Functionality */
@@ -127,7 +127,6 @@ export function classicMode(activateAI) {
 
 		let columnToUse = 
             Math.random () < 0.2 ? columnList[Math.floor(Math.random() * columnList.length)] : doAlgorithm()
-		console.log("AI column to use: ", columnToUse);
 
 		if (columnToUse && !isColumnPlayable(columnToUse))
             columnToUse = columnList.find(column => isColumnPlayable(column));
@@ -149,8 +148,8 @@ export function classicMode(activateAI) {
 
     /* Utils */
 
-    function delay(ms) {
-        return delayEngine(ms);
+    async function delay(ms) {
+        await delayEngine(ms);
     }
     
     document.getElementById("btnMn").addEventListener("click", () => {

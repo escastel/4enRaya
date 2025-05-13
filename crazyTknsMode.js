@@ -310,6 +310,7 @@ export function crazyTokensMode(AI) {
             diceIcon.innerText = "❌";
             return;
         }
+
         if (currentPlayer.specialToken) {
             currentPlayer.useSpecial = true;
             diceContainer.classList.add("usingDice");
@@ -338,6 +339,7 @@ export function crazyTokensMode(AI) {
             column.classList.remove("opacity-50");
             column.style.pointerEvents = "auto";
         });
+
         let tokens = Array.from(document.getElementsByClassName("lockToken"));
         tokens.forEach((token) => {
             token.innerText = "";
@@ -345,8 +347,8 @@ export function crazyTokensMode(AI) {
     }
 
     async function disableBlind(){
-        console.log("disableBlind")
         let tokens = Array.from(document.getElementsByClassName("token"));
+        
         tokens.forEach((token) => {
             token.style.backgroundColor = token.classList.contains("red") ? "red" : "yellow";
             token.innerText = "";
@@ -355,6 +357,7 @@ export function crazyTokensMode(AI) {
 
     async function disableGhost() {
         let tokens = Array.from(document.getElementsByClassName("ghostToken"));
+        
         for (const token of tokens) {
             const columnId = token.parentElement.parentElement.id;
             const columnData = boardMap.get(columnId);
@@ -451,6 +454,7 @@ export function crazyTokensMode(AI) {
             }
             token.innerText = "";
 		})
+
         player1.color === "red" ? player1.color = "yellow" : player1.color = "red";
         player2.color === "yellow" ? player2.color = "red" : player2.color = "yellow";
         player1.num === 1 ? player1.num = 2 : player1.num = 1;
@@ -536,7 +540,7 @@ export function crazyTokensMode(AI) {
                 await handleLock(column, player);
                 break;
             case "👻":
-                await handleGhost(player, column);
+                await handleGhost();
                 break;
             case "🎲":
                 await handleDice();
@@ -561,6 +565,7 @@ export function crazyTokensMode(AI) {
             token.classList.add("lockToken")
         if (player.specialToken === "🌫️")
             token.classList.add("blindToken")
+        
         token.innerText = `${player.specialToken}`;
         cell.className = "filled";
         cell.appendChild(token);
@@ -571,10 +576,13 @@ export function crazyTokensMode(AI) {
         disableClicks();
 
         const currentPlayer = player1.turn ? player1 : player2;
+        
         const cells = columnMap.get(column.id);
         const columnData = boardMap.get(column.id);
+        
         const row = columnData.findIndex(cell => cell === 0);
         if (row === -1) return;
+
         if (currentPlayer.specialToken === "👻")
             columnData[row] = 3;
         else
